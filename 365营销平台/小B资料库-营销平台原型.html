@@ -37,7 +37,7 @@
         <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
       </form>
       <div class="panel tablewrap">
-        <table><thead><tr><th>素材预览</th><th>素材名称</th><th>角色 ID</th><th>姓名</th><th>素材类型</th><th>上传场景</th><th>机审结果</th><th>审核状态</th><th>上传时间</th><th>备注</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table>
+        <table><thead><tr><th>素材预览</th><th>素材名称</th><th>角色 ID</th><th>姓名</th><th>素材类型</th><th>上传场景</th><th>机审结果</th><th>审核状态</th><th>审核人</th><th>审核时间</th><th>上传时间</th><th>备注</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table>
       </div>
     </section>
     <section id="library" hidden>
@@ -113,7 +113,7 @@ const assets = [
   { id: 6, city: '西安', roleId: 'B30021', name: '王顾问', type: '图片', source: '素材库上传', time: '11-17 10:18', image: 'thumb-skyline.jpg', machine: '不通过', status: '待人工审核' },
   { id: 7, city: '西安', roleId: 'B30021', name: '王顾问', type: '图片', source: '素材库上传', time: '11-17 09:23', image: 'thumb-community.jpg', machine: '通过', status: '审核通过' },
   { id: 8, ref: 'asset-6', city: '南京', roleId: 'B10086', name: '张顾问', type: '视频', source: '素材库上传', time: '11-15 14:25', image: 'thumb-skyline.jpg', machine: '通过', status: '审核通过' },
-  { id: 9, ref: 'asset-4', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '会话发送', time: '11-16 17:20', image: 'thumb-skyline.jpg', machine: '不通过', status: '审核未通过' }
+  { id: 9, ref: 'asset-4', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '会话发送', time: '11-16 17:20', image: 'thumb-skyline.jpg', machine: '不通过', status: '审核未通过', manual: '审核未通过', reviewer: '运营审核员', reviewedAt: '11-16 17:31', reason: '内容不符合平台发布规范' }
 ];
 const search = { audit: {}, library: {} };
 let currentPage;
@@ -186,7 +186,7 @@ function renderList(page) {
   }
   if (!records.length) {
     const empty = make('td', 'table-empty', '暂无符合条件的素材');
-    empty.colSpan = page === 'audit' ? 11 : 10;
+    empty.colSpan = page === 'audit' ? 13 : 10;
     rows.insertRow().append(empty);
     return;
   }
@@ -205,6 +205,10 @@ function renderList(page) {
     const status = page === 'library' ? usageStatus(asset) : asset.status;
     const tone = ['可用', '审核通过'].includes(status) ? '' : ['已禁用', '已删除', '审核未通过'].includes(status) ? ' no' : ' wait';
     row.insertCell().append(make('span', 'pill' + tone, status));
+    if (page === 'audit') {
+      row.insertCell().textContent = asset.manual ? (asset.reviewer || '未记录') : '—';
+      row.insertCell().textContent = asset.manual ? (asset.reviewedAt || '未记录') : '—';
+    }
     if (page === 'audit') row.insertCell().textContent = asset.time;
     row.insertCell().textContent = ReportPrototype.isDeleted(assetRef(asset)) ? '经纪人已删除' : '';
     const view = make('button', 'link', page === 'audit' && canReview(asset) ? '审核' : '查看');
@@ -265,6 +269,7 @@ function openDetail(id) {
   } else {
     fields.push(['机审结果', asset.machine], ['审核状态', asset.status]);
     if (asset.manual) fields.push(['人工审核结果', asset.manual]);
+    if (asset.manual) fields.push(['审核人', asset.reviewer || '未记录'], ['审核时间', asset.reviewedAt || '未记录']);
     if (asset.reason) fields.push(['不通过原因', asset.reason]);
   }
   if (ReportPrototype.isDeleted(assetRef(asset))) {
@@ -309,6 +314,8 @@ function decide(result) {
   if (!confirm(result === '审核通过' ? '确认人工审核通过？' : '确认人工审核不通过？')) return;
   asset.status = result;
   asset.manual = result;
+  asset.reviewer = document.querySelector('.user span')?.textContent.trim() || '运营审核员';
+  asset.reviewedAt = new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
   asset.reason = result === '审核未通过' ? reason : '';
   openDetail(asset.id);
 }
