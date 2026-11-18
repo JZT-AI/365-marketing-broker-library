@@ -3,6 +3,7 @@
 .lib-thumb{width:46px;height:46px;object-fit:cover;border-radius:7px;display:block}.preview img{width:100%;height:245px;object-fit:cover;border-radius:10px}.config-tabs{display:flex;gap:9px;margin-bottom:14px}.config-tabs button{padding:9px 18px;border:1px solid #d8e3eb;background:#fff;border-radius:7px;color:#567}.config-tabs button.on{background:#eaf5ff;border-color:#83c2ec;color:#208ac9}.rich-toolbar{display:flex;gap:7px;padding:8px;background:#f5f8fb;border:1px solid #dce5ed;border-bottom:0;border-radius:8px 8px 0 0}.rich-toolbar button{min-width:32px;height:30px;background:#fff;border:1px solid #dce4ec;border-radius:5px}.rich-editor{min-height:180px;border:1px solid #dce5ed;border-radius:0 0 8px 8px;padding:15px;outline:0;line-height:1.65;font-size:14px}.config-preview{min-height:70px;background:#f9fbfd;border:1px solid #e5ebf1;border-radius:8px;padding:14px;margin-top:15px;line-height:1.6;font-size:13px}.config-tip{font-size:12px;color:#8896a4;margin:10px 0 18px}
 [hidden]{display:none!important}.main{min-width:0}.user{display:flex;justify-content:center;gap:12px}.city-switch{appearance:auto;color:#fff;background:#176abe;border:1px solid #ffffff50;border-radius:5px;padding:5px}.city-switch option{color:#263449;background:#fff}.scope{color:#426481;font-size:13px}.head .scope{margin-left:8px}.field-input{width:100%;height:36px;margin-top:6px;border:1px solid #dfe5ed;border-radius:5px;padding:8px}.table-empty{text-align:center;padding:26px;color:#62738b}.preview video{width:100%;max-height:360px;border-radius:9px}.preview img{height:auto;max-height:360px;object-fit:contain}.rich-editor:focus-visible{outline:2px solid #399de8}
 .detail-fields-title{font-size:14px;color:#34465e;margin:21px 0 8px;padding-top:16px;border-top:1px solid #e8edf3}
+.report-name{font-weight:700;color:#273d55}.report-modules{color:#6c7e90}.report-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}.report-detail-grid .panel{margin:0}.report-detail-grid h2{margin:0 0 16px;font-size:17px}.report-floor-list{display:grid;gap:9px;margin-top:10px}.report-floor{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid #e5ebf2;border-radius:8px;background:#f9fbfd;color:#304256;font-size:13px}.report-floor small{color:#8493a4}.report-qr-panel{text-align:center}.report-qr-panel img{display:block;width:248px;height:248px;max-width:100%;margin:14px auto;padding:9px;border:1px solid #e5ebf2;border-radius:10px;background:#fff;image-rendering:pixelated}.report-qr-panel p{margin:10px 0;color:#77889b;font-size:12px}.report-qr-panel strong{display:block;font-size:14px;color:#33465d}@media(max-width:900px){.report-detail-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header class="top">
@@ -22,6 +23,7 @@
   <aside class="side" aria-label="资料库管理">
     <a href="#audit" data-page="audit">待审核素材</a>
     <a href="#library" data-page="library">入库素材</a>
+    <a href="#reports" data-page="reports">报告查询</a>
     <a href="#config" data-page="config">说明与须知</a>
   </aside>
   <main class="main">
@@ -49,6 +51,18 @@
       </form>
       <div class="panel tablewrap">
         <table><thead><tr><th>素材预览</th><th>素材名称</th><th>角色 ID</th><th>姓名</th><th>素材分类</th><th>上传场景</th><th>上传时间</th><th>使用状态</th><th>备注</th><th>操作</th></tr></thead><tbody id="libraryRows"></tbody></table>
+      </div>
+    </section>
+    <section id="reports" hidden>
+      <div class="head"><h1>报告查询</h1></div>
+      <form class="panel filters" id="reportsFilters">
+        <label>报告名称<input name="title" placeholder="输入报告名称"></label>
+        <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
+        <label>编辑人<input name="editor" placeholder="输入姓名"></label>
+        <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
+      </form>
+      <div class="panel tablewrap">
+        <table><thead><tr><th>报告名称</th><th>角色 ID</th><th>编辑人</th><th>内容模块</th><th>最近编辑时间</th><th>操作</th></tr></thead><tbody id="reportsRows"></tbody></table>
       </div>
     </section>
     <section id="config" hidden>
@@ -87,6 +101,13 @@
         </div>
       </div>
     </section>
+    <section id="reportDetail" hidden>
+      <div class="head"><h1>报告详情</h1><button class="ghost" type="button" id="backToReports">返回列表</button></div>
+      <div class="report-detail-grid">
+        <div class="panel"><h2 id="reportDetailTitle"></h2><div id="reportDetailFields"></div><h3 class="detail-fields-title">报告内容</h3><div class="report-floor-list" id="reportDetailFloors"></div></div>
+        <div class="panel report-qr-panel"><strong>扫码查看报告</strong><img id="reportQr" alt="报告预览二维码"><p>使用手机扫码，在淘房小程序报告原型中查看</p></div>
+      </div>
+    </section>
     <div class="panel" id="unavailable" hidden>当前账号无权访问该页面。</div>
   </main>
 </div>
@@ -96,14 +117,14 @@ const byId = id => document.getElementById(id);
 const citySelect = byId('citySelect');
 // Standalone prototype permission scenarios: ?profile=city, ?profile=view, ?profile=platform.
 const profiles = {
-  all: { cities: ['南京', '西安'], reviewCities: ['南京', '西安'], manageCities: ['南京', '西安'], editShared: true },
-  city: { cities: ['西安'], reviewCities: ['西安'], manageCities: ['西安'], editShared: false },
-  view: { cities: ['西安'], reviewCities: [], manageCities: [], editShared: false },
-  platform: { cities: [], reviewCities: [], manageCities: [], editShared: true }
+  all: { cities: ['南京', '西安'], reviewCities: ['南京', '西安'], manageCities: ['南京', '西安'], reportCities: ['南京', '西安'], editShared: true },
+  city: { cities: ['西安'], reviewCities: ['西安'], manageCities: ['西安'], reportCities: ['西安'], editShared: false },
+  view: { cities: ['西安'], reviewCities: [], manageCities: [], reportCities: [], editShared: false },
+  platform: { cities: [], reviewCities: [], manageCities: [], reportCities: [], editShared: true }
 };
 const profileKey = new URLSearchParams(location.search).get('profile');
 const access = Object.hasOwn(profiles, profileKey) ? profiles[profileKey] : profiles.all;
-const pageNames = { audit: '待审核素材', library: '入库素材', config: '说明与须知' };
+const pageNames = { audit: '待审核素材', library: '入库素材', reports: '报告查询', config: '说明与须知' };
 const assets = [
   { id: 1, ref: 'asset-3', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '素材库上传', time: '11-17 08:02', image: 'thumb-community.jpg', machine: '需人工审核', status: '待人工审核' },
   { id: 2, city: '南京', roleId: 'B20415', name: '李顾问', type: '视频', source: '素材库上传', time: '11-17 09:31', image: 'thumb-video.jpg', machine: '不通过', status: '待人工审核' },
@@ -115,12 +136,17 @@ const assets = [
   { id: 8, ref: 'asset-6', city: '南京', roleId: 'B10086', name: '张顾问', type: '视频', source: '素材库上传', time: '11-15 14:25', image: 'thumb-skyline.jpg', machine: '通过', status: '审核通过' },
   { id: 9, ref: 'asset-4', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '会话发送', time: '11-16 17:20', image: 'thumb-skyline.jpg', machine: '不通过', status: '审核未通过', manual: '审核未通过', reviewer: '运营审核员', reviewedAt: '11-16 17:31', reason: '内容不符合平台发布规范' }
 ];
-const search = { audit: {}, library: {} };
+const reports = [
+  { id: 'R001', city: '南京', roleId: 'B10086', editor: '张顾问', title: '周末看房实景资料', createdAt: '2026-11-15 10:20', updatedAt: '2026-11-17 10:18', floors: [{title:'实景照片',count:2},{title:'实拍视频',count:1}], qr: 'qr-report-nanjing.png' },
+  { id: 'R002', city: '西安', roleId: 'B30021', editor: '王顾问', title: '西安三房看房参考', createdAt: '2026-11-16 16:00', updatedAt: '2026-11-17 10:38', floors: [{title:'房源推荐',count:2},{title:'小区推荐',count:1},{title:'实景照片',count:1}], qr: 'qr-report-xian.png' }
+];
+const search = { audit: {}, library: {}, reports: {} };
 let currentPage;
 let currentAsset;
 
 function canUse(page) {
-  return page === 'config' ? access.editShared : access.cities.includes(citySelect.value);
+  return page === 'config' ? access.editShared : page === 'reports'
+    ? access.reportCities.includes(citySelect.value) : access.cities.includes(citySelect.value);
 }
 function canReview(asset) {
   return asset.city === citySelect.value && access.reviewCities.includes(asset.city)
@@ -168,6 +194,7 @@ function make(tag, className, text) {
 }
 
 function renderList(page) {
+  if (page === 'reports') { renderReports(); return; }
   const rows = byId(page + 'Rows');
   rows.replaceChildren();
   if (!canUse(page)) return;
@@ -224,10 +251,62 @@ function renderList(page) {
   }
 }
 
+function renderReports() {
+  const rows = byId('reportsRows');
+  rows.replaceChildren();
+  if (!canUse('reports')) return;
+  const criteria = search.reports;
+  const visible = reports.filter(report => report.city === citySelect.value
+    && (!criteria.title || report.title.includes(criteria.title))
+    && (!criteria.roleId || report.roleId === criteria.roleId.toUpperCase())
+    && (!criteria.editor || report.editor.includes(criteria.editor)))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  if (!visible.length) {
+    const empty = make('td', 'table-empty', '暂无符合条件的报告');
+    empty.colSpan = 6;
+    rows.insertRow().append(empty);
+    return;
+  }
+  for (const report of visible) {
+    const row = rows.insertRow();
+    row.insertCell().append(make('span', 'report-name', report.title));
+    for (const value of [report.roleId, report.editor]) row.insertCell().textContent = value;
+    row.insertCell().append(make('span', 'report-modules', report.floors.map(floor => floor.title).join('、')));
+    row.insertCell().textContent = report.updatedAt;
+    const view = make('button', 'link', '查看报告');
+    view.addEventListener('click', () => openReportDetail(report.id));
+    row.insertCell().append(view);
+  }
+}
+
+function openReportDetail(id) {
+  if (currentPage !== 'reports' || !canUse('reports')) return;
+  const report = reports.find(item => item.id === id && item.city === citySelect.value);
+  if (!report) return;
+  byId('reports').hidden = true;
+  byId('reportDetail').hidden = false;
+  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / 报告查询 / 报告详情';
+  byId('reportDetailTitle').textContent = report.title;
+  const fields = [['角色 ID',report.roleId],['编辑人',report.editor],['所属城市',report.city],['创建时间',report.createdAt],['最近编辑时间',report.updatedAt]];
+  byId('reportDetailFields').replaceChildren(...fields.map(([label,value]) => {
+    const row = make('div','kv');
+    row.append(make('span','',label),make('b','',value));
+    return row;
+  }));
+  byId('reportDetailFloors').replaceChildren(...report.floors.map(floor => {
+    const row = make('div','report-floor');
+    row.append(make('span','',floor.title),make('small','',floor.count+' 条内容'));
+    return row;
+  }));
+  byId('reportQr').src = report.qr;
+  byId('reportQr').alt = report.title + '预览二维码';
+}
+
 function showPage(page) {
   currentPage = page;
   currentAsset = null;
   byId('detail').hidden = true;
+  byId('reportDetail').hidden = true;
   byId('unavailable').hidden = canUse(page);
   for (const link of document.querySelectorAll('[data-page]')) {
     const value = link.dataset.page;
@@ -383,14 +462,14 @@ function previewConfig() {
 for (const city of access.cities) citySelect.add(new Option(city, city));
 citySelect.hidden = !access.cities.length;
 citySelect.addEventListener('change', () => {
-  for (const page of ['audit', 'library']) {
+  for (const page of ['audit', 'library', 'reports']) {
     byId(page + 'Filters').reset();
     search[page] = {};
   }
   if (currentPage !== 'config') showPage(currentPage);
 });
 
-for (const page of ['audit', 'library']) {
+for (const page of ['audit', 'library', 'reports']) {
   const form = byId(page + 'Filters');
   form.addEventListener('submit', event => {
     event.preventDefault();
@@ -403,6 +482,7 @@ for (const page of ['audit', 'library']) {
   });
 }
 byId('backToList').addEventListener('click', () => showPage(currentPage));
+byId('backToReports').addEventListener('click', () => showPage('reports'));
 byId('reason').addEventListener('input', event => event.target.setCustomValidity(''));
 for (const button of document.querySelectorAll('[data-result]')) {
   button.addEventListener('click', () => decide(button.dataset.result));
