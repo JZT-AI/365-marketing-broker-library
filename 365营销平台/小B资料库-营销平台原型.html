@@ -216,7 +216,7 @@ function originalFileInfo(asset) {
     size: asset.type === '视频' ? '28.4 MB' : '3.8 MB',
     resolution: asset.type === '视频' ? '1920 × 1080' : '3024 × 4032',
     duration: asset.type === '视频' ? '00:18' : undefined,
-    capturedAt: '未记录', device: '未记录', location: '未记录'
+    capturedAt: '未记录', device: '未记录', location: asset.ref==='asset-1'?'32.0462, 118.7781':'未记录'
   };
 }
 function make(tag, className, text) {
@@ -336,7 +336,7 @@ function openDetail(id) {
   const fields=[['素材名称',assetName(asset)],['角色 ID',asset.roleId],['姓名',asset.name],['素材类型',asset.type],['上传场景',asset.source],['上传时间',asset.time],['使用状态',usageStatus(asset)]];
   if(ReportPrototype.isDeleted(assetRef(asset)))fields.push(['删除时间',new Date(ReportPrototype.deletedAt(assetRef(asset))).toLocaleString('zh-CN')]);
   const metadata=originalFileInfo(asset);
-  const sourceFields=[['原始文件名',metadata.fileName],['文件格式',metadata.format],['文件大小',metadata.size],['分辨率',metadata.resolution],...(asset.type==='视频'?[['视频时长',metadata.duration]]:[]),['拍摄时间',metadata.capturedAt],['拍摄设备',metadata.device],['拍摄位置',metadata.location]];
+  const sourceFields=[['原始文件名',metadata.fileName],['文件格式',metadata.format],['文件大小',metadata.size],['分辨率',metadata.resolution],...(asset.type==='视频'?[['视频时长',metadata.duration]]:[]),['拍摄时间',metadata.capturedAt],['拍摄设备',metadata.device],['拍摄位置（原始经纬度）',metadata.location]];
   const row=([label,value])=>{const item=make('div','kv');item.append(make('span','',label),make('b','',value||'未记录'));return item};
   byId('detailFields').replaceChildren(...fields.map(row),make('h3','detail-fields-title','原文件信息'),...sourceFields.map(row));
 }
