@@ -26,7 +26,6 @@
     <a href="#library" data-page="library">素材管理</a>
     <a href="#reports" data-page="reports">报告管理</a>
     <a href="#config" data-page="config">说明与须知</a>
-    <button type="button" id="prototypeReset" class="ghost" style="margin:18px 12px;width:calc(100% - 24px)">重置资料库演示</button>
   </aside>
   <main class="main">
     <div class="crumb" id="breadcrumb"></div>
@@ -94,6 +93,8 @@
 <dialog id="qrDialog" class="availability-dialog qr-dialog"><div class="dialog-body"><h2 id="qrTitle">淘房小程序码</h2><img id="qrImage" alt="淘房小程序码演示图"><p id="qrTip"></p><div class="actions"><button class="ghost" type="button" id="qrClose">关闭</button></div></div></dialog>
 <script src="../report-shared.js"></script>
 <script>
+// Refresh starts a fresh prototype session; interactions on this page keep their state.
+try { for(const key of Object.keys(localStorage))if(key.startsWith('smallb-')||key.startsWith('demo-')||key.startsWith('youke-assets-'))localStorage.removeItem(key) } catch {}
 const byId = id => document.getElementById(id);
 const citySelect = byId('citySelect');
 // Standalone prototype permission scenarios: ?profile=city, ?profile=view, ?profile=platform.
@@ -142,7 +143,6 @@ const reportDisabled=new Set(JSON.parse(localStorage.getItem('demo-disabled-repo
 const sentReports=[{id:'S001',reportId:'R001',city:'南京',roleId:'B10086',name:'张顾问',title:'周末看房实景照片',time:'11-17 11:20',recipient788Id:'78810031'},{id:'S002',reportId:'R002',city:'西安',roleId:'B30021',name:'王顾问',title:'西安三房看房参考',time:'11-17 11:45',recipient788Id:'78820418'},{id:'S003',reportId:'R003',city:'南京',roleId:'B10086',name:'张顾问',title:'周末现场讲解视频',time:'11-17 12:00',recipient788Id:'78830912',deleted:true}];
 function persistReportStates(){localStorage.setItem('demo-disabled-reports',JSON.stringify([...reportDisabled]))}
 
-byId('prototypeReset').onclick=()=>{if(!confirm('重置资料库演示数据？'))return;for(const key of Object.keys(localStorage)){if(key.startsWith('demo-')||key.startsWith('smallb-')||key.startsWith('youke-assets-'))localStorage.removeItem(key)}location.reload()};
 let currentPage;
 let currentAsset;
 
