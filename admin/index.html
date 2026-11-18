@@ -94,7 +94,7 @@
 <script src="../report-shared.js"></script>
 <script>
 // Refresh starts a fresh prototype session; interactions on this page keep their state.
-try { for(const key of Object.keys(localStorage))if(key.startsWith('smallb-')||key.startsWith('demo-')||key.startsWith('youke-assets-'))localStorage.removeItem(key) } catch {}
+try { if(performance.getEntriesByType('navigation')[0]?.type==='reload')for(const key of Object.keys(localStorage))if(key.startsWith('smallb-')||key.startsWith('demo-')||key.startsWith('youke-assets-'))localStorage.removeItem(key) } catch {}
 const byId = id => document.getElementById(id);
 const citySelect = byId('citySelect');
 // Standalone prototype permission scenarios: ?profile=city, ?profile=view, ?profile=platform.
