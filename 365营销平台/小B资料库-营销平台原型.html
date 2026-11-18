@@ -22,7 +22,8 @@
 <div class="shell">
   <aside class="side" aria-label="资料库管理">
     <a href="#library" data-page="library">素材管理</a>
-    <a href="#reports" data-page="reports">报告查询</a>
+    <a href="#reports" data-page="reports">报告管理</a>
+    <a href="#sentReports" data-page="sentReports">报告发送记录</a>
     <a href="#config" data-page="config">说明与须知</a>
   </aside>
   <main class="main">
@@ -39,7 +40,7 @@
       </div>
     </section>
     <section id="reports" hidden>
-      <div class="head"><h1>报告查询</h1></div>
+      <div class="head"><h1>报告管理</h1></div>
       <form class="panel filters" id="reportsFilters">
         <label>报告名称<input name="title" placeholder="输入报告名称"></label>
         <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
@@ -47,9 +48,15 @@
         <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
       </form>
       <div class="panel tablewrap">
-        <table><thead><tr><th>报告名称</th><th>角色 ID</th><th>编辑人</th><th>内容模块</th><th>最近编辑时间</th><th>操作</th></tr></thead><tbody id="reportsRows"></tbody></table>
+        <table><thead><tr><th>报告名称</th><th>角色 ID</th><th>编辑人</th><th>内容模块</th><th>最近编辑时间</th><th>报告状态</th><th>操作</th></tr></thead><tbody id="reportsRows"></tbody></table>
       </div>
     </section>
+    <section id="sentReports" hidden>
+      <div class="head"><h1>报告发送记录</h1></div>
+      <div class="panel"><p>每次成功发送都保留独立快照。勾选记录后可批量禁用，已删除报告的历史记录仍可处理。</p><div class="actions"><button class="ghost" type="button" id="selectAllSnapshots">全选当前城市</button><button class="primary" type="button" id="disableSnapshots">禁用所选快照</button></div></div>
+      <div class="panel tablewrap"><table><thead><tr><th>选择</th><th>报告名称</th><th>发送人角色 ID</th><th>姓名</th><th>发送时间</th><th>接收对象</th><th>快照状态</th><th>操作</th></tr></thead><tbody id="sentReportRows"></tbody></table></div>
+    </section>
+    <section id="snapshotDetail" hidden><div class="head"><h1>发送快照详情</h1><button class="ghost" type="button" id="backToSentReports">返回列表</button></div><div class="report-detail-grid"><div class="panel"><h2 id="snapshotTitle"></h2><div id="snapshotFields"></div><p>此处查看的是发送时保留的内容，原报告编辑或删除不改变本次快照。</p></div><div class="panel report-qr-panel"><strong>客户查看入口</strong><img id="snapshotQr" alt="快照二维码"><p id="snapshotStatusTip"></p><button class="ghost" type="button" id="openSnapshot">打开客户页示例</button></div></div></section>
     <section id="config" hidden>
       <div class="head"><h1>说明与须知</h1><span class="scope">对所有城市生效</span></div>
       <div class="config-tabs">
@@ -103,7 +110,7 @@ const profiles = {
 };
 const profileKey = new URLSearchParams(location.search).get('profile');
 const access = Object.hasOwn(profiles, profileKey) ? profiles[profileKey] : profiles.all;
-const pageNames = { library: '素材管理', reports: '报告查询', config: '说明与须知' };
+const pageNames = { library: '素材管理', reports: '报告管理', sentReports: '报告发送记录', config: '说明与须知' };
 const assets = [
   {id:1,ref:'asset-3',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-17 08:02',image:'thumb-community.jpg'},
   {id:2,city:'南京',roleId:'B20415',name:'李顾问',type:'视频',source:'素材库上传',time:'11-17 09:31',image:'thumb-video.jpg'},
@@ -121,11 +128,16 @@ const reports = [
   { id: 'R003', city: '南京', roleId: 'B10086', editor: '张顾问', title: '周末现场讲解视频', createdAt: '2026-11-17 09:40', updatedAt: '2026-11-17 09:52', floors: [{title:'实拍视频',count:2}], qr: 'qr-report-video.png' }
 ];
 const search = { library: {}, reports: {} };
+const reportDisabled=new Set(JSON.parse(localStorage.getItem('demo-disabled-reports')||'[]'));
+const snapshotDisabled=new Set(JSON.parse(localStorage.getItem('demo-disabled-snapshots')||'[]'));
+const sentReports=[{id:'S001',reportId:'R001',city:'南京',roleId:'B10086',name:'张顾问',title:'周末看房实景照片',time:'11-17 11:20',recipient:'林小姐'},{id:'S002',reportId:'R002',city:'西安',roleId:'B30021',name:'王顾问',title:'西安三房看房参考',time:'11-17 11:45',recipient:'陈先生'},{id:'S003',reportId:'R003',city:'南京',roleId:'B10086',name:'张顾问',title:'周末现场讲解视频',time:'11-17 12:00',recipient:'刘先生',deleted:true}];
+function persistReportStates(){localStorage.setItem('demo-disabled-reports',JSON.stringify([...reportDisabled]));localStorage.setItem('demo-disabled-snapshots',JSON.stringify([...snapshotDisabled]))}
+
 let currentPage;
 let currentAsset;
 
 function canUse(page) {
-  return page === 'config' ? access.editShared : page === 'reports'
+  return page === 'config' ? access.editShared : (page === 'reports' || page === 'sentReports')
     ? access.reportCities.includes(citySelect.value) : access.cities.includes(citySelect.value);
 }
 function canManageAvailability(asset) {
@@ -170,7 +182,7 @@ function make(tag, className, text) {
 }
 
 function renderList(page) {
-  if(page==='reports'){renderReports();return}
+  if(page==='reports'){renderReports();return}if(page==='sentReports'){renderSentReports();return}
   const rows=byId('libraryRows');rows.replaceChildren();
   if(!canUse('library'))return;
   const criteria=search.library;
@@ -201,7 +213,7 @@ function renderReports() {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   if (!visible.length) {
     const empty = make('td', 'table-empty', '暂无符合条件的报告');
-    empty.colSpan = 6;
+    empty.colSpan = 7;
     rows.insertRow().append(empty);
     return;
   }
@@ -211,19 +223,27 @@ function renderReports() {
     for (const value of [report.roleId, report.editor]) row.insertCell().textContent = value;
     row.insertCell().append(make('span', 'report-modules', report.floors.map(floor => floor.title).join('、')));
     row.insertCell().textContent = report.updatedAt;
+    row.insertCell().textContent=reportDisabled.has(report.id)?'已禁用':sentReports.some(x=>x.reportId===report.id&&x.deleted)?'经纪人已删除':'可用';
     const view = make('button', 'link', '查看报告');
     view.addEventListener('click', () => openReportDetail(report.id));
-    row.insertCell().append(view);
+    const actions=row.insertCell();actions.append(view);if(!sentReports.some(x=>x.reportId===report.id&&x.deleted)){const toggle=make('button','link',reportDisabled.has(report.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{if(!confirm((reportDisabled.has(report.id)?'恢复':'禁用')+'报告「'+report.title+'」？禁用后经纪人端不可见，所有历史快照不可查看。'))return;reportDisabled.has(report.id)?reportDisabled.delete(report.id):reportDisabled.add(report.id);persistReportStates();renderReports()};actions.append(toggle)}
   }
 }
 
+function renderSentReports(){const rows=byId('sentReportRows');rows.replaceChildren();if(!canUse('sentReports'))return;for(const record of sentReports.filter(x=>x.city===citySelect.value)){const row=rows.insertRow();const box=document.createElement('input');box.type='checkbox';box.value=record.id;box.className='snapshot-select';row.insertCell().append(box);for(const value of [record.title,record.roleId,record.name,record.time,record.recipient])row.insertCell().textContent=value;const blocked=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);row.insertCell().textContent=reportDisabled.has(record.reportId)?'所属报告已禁用':snapshotDisabled.has(record.id)?'已禁用':'可查看';const op=row.insertCell();const view=make('button','link','查看快照');view.onclick=()=>openSnapshotDetail(record);op.append(view);const toggle=make('button','link',snapshotDisabled.has(record.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{if(!confirm((snapshotDisabled.has(record.id)?'恢复':'禁用')+'这次发送快照？'))return;snapshotDisabled.has(record.id)?snapshotDisabled.delete(record.id):snapshotDisabled.add(record.id);persistReportStates();renderSentReports()};op.append(toggle)}}
+let currentSnapshot=null;
+function openSnapshotDetail(record){currentSnapshot=record;byId('sentReports').hidden=true;byId('snapshotDetail').hidden=false;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告发送记录 / 快照详情';byId('snapshotTitle').textContent=record.title;const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);byId('snapshotFields').textContent='发送人：'+record.name+'（'+record.roleId+'）  ·  接收对象：'+record.recipient+'  ·  发送时间：'+record.time;byId('snapshotStatusTip').textContent=disabled?'客户点击历史卡片将看到「该报告暂不可查看」':'客户可查看本次发送时的内容';byId('snapshotQr').src=reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png'}
+byId('backToSentReports').onclick=()=>showPage('sentReports');
+byId('openSnapshot').onclick=()=>{if(!currentSnapshot)return;const sample=currentSnapshot.reportId;const disabled=reportDisabled.has(sample)||snapshotDisabled.has(currentSnapshot.id);window.open('https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+sample+(disabled?'&disabled=1':''),'_blank')};
+byId('selectAllSnapshots').onclick=()=>document.querySelectorAll('#sentReportRows .snapshot-select').forEach(x=>x.checked=true);
+byId('disableSnapshots').onclick=()=>{const ids=[...document.querySelectorAll('#sentReportRows .snapshot-select:checked')].map(x=>x.value);if(!ids.length){alert('请先选择发送记录');return}if(!confirm('禁用所选 '+ids.length+' 条快照？'))return;ids.forEach(id=>snapshotDisabled.add(id));persistReportStates();renderSentReports()};
 function openReportDetail(id) {
   if (currentPage !== 'reports' || !canUse('reports')) return;
   const report = reports.find(item => item.id === id && item.city === citySelect.value);
   if (!report) return;
   byId('reports').hidden = true;
   byId('reportDetail').hidden = false;
-  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / 报告查询 / 报告详情';
+  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / 报告管理 / 报告详情';
   byId('reportDetailTitle').textContent = report.title;
   const fields = [['角色 ID',report.roleId],['编辑人',report.editor],['所属城市',report.city],['创建时间',report.createdAt],['最近编辑时间',report.updatedAt]];
   byId('reportDetailFields').replaceChildren(...fields.map(([label,value]) => {
@@ -245,6 +265,7 @@ function showPage(page) {
   currentAsset = null;
   byId('detail').hidden = true;
   byId('reportDetail').hidden = true;
+  byId('snapshotDetail').hidden = true;
   byId('unavailable').hidden = canUse(page);
   for (const link of document.querySelectorAll('[data-page]')) {
     const value = link.dataset.page;
