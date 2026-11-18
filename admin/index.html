@@ -5,6 +5,7 @@
 .detail-fields-title{font-size:14px;color:#34465e;margin:21px 0 8px;padding-top:16px;border-top:1px solid #e8edf3}
 .report-name{font-weight:700;color:#273d55}.report-detail-grid{display:grid;grid-template-columns:minmax(360px,560px) 330px;gap:16px;max-width:930px}.report-detail-grid .panel{margin:0}.report-detail-grid h2{margin:0 0 16px;font-size:18px}.report-detail-grid .kv{grid-template-columns:100px 1fr;margin:17px 0}.report-qr-panel{text-align:center}.qr-brand{display:inline-flex;align-items:center;gap:7px;margin:0 auto 10px;color:#2272ac;font-size:12px;font-weight:700}.qr-brand::before{content:'⌂';display:grid;width:23px;height:23px;place-items:center;border-radius:7px;background:#e7f4ff;font-size:18px}.report-qr-panel img{display:block;width:248px;height:248px;max-width:100%;margin:14px auto;padding:9px;border:1px solid #e5ebf2;border-radius:10px;background:#fff;image-rendering:pixelated}.report-qr-panel p{margin:10px 0;color:#77889b;font-size:12px}.report-qr-panel strong{display:block;font-size:14px;color:#33465d}@media(max-width:900px){.report-detail-grid{grid-template-columns:1fr}}
 .brand{white-space:nowrap}
+.availability-dialog{width:min(440px,calc(100vw - 36px));border:0;border-radius:16px;padding:0;box-shadow:0 24px 65px #26344933;color:#263449}.availability-dialog::backdrop{background:#18223575}.availability-dialog form,.availability-dialog .dialog-body{padding:24px}.availability-dialog h2{margin:0 0 9px;font-size:19px}.availability-dialog p{margin:0 0 18px;color:#67788a;font-size:13px;line-height:1.65}.availability-dialog label{display:grid;gap:8px;color:#40526a;font-size:13px;font-weight:650}.availability-dialog textarea{width:100%;min-height:88px;resize:vertical;border:1px solid #dce5ee;border-radius:9px;padding:11px;font:inherit;font-size:13px}.availability-dialog .error{min-height:18px;color:#c54646;font-size:12px;margin-top:6px}.availability-dialog .actions{justify-content:flex-end;margin-top:8px}.action-history-item{padding:12px 0;border-top:1px solid #edf1f5;font-size:13px;line-height:1.6}.action-history-item:first-child{border-top:0}.action-history-item b{color:#354a60}.action-history-item small{display:block;color:#8795a5}.action-history-item p{margin:5px 0 0;color:#65768a}.history-list{max-height:350px;overflow:auto}.qr-dialog{text-align:center}.qr-dialog img{width:224px;height:224px;max-width:100%;padding:8px;border:1px solid #e5ebf2;border-radius:10px;image-rendering:pixelated}.qr-dialog .actions{justify-content:center}
 </style></head>
 <body>
 <header class="top">
@@ -55,7 +56,6 @@
       <div class="head"><h1 id="sentReportsTitle">发送记录</h1><button class="ghost" type="button" id="backFromSentReports">返回报告列表</button></div>
       <div class="panel tablewrap"><table><thead><tr><th>发送时间</th><th>接收用户 788 ID</th><th>快照状态</th><th>操作</th></tr></thead><tbody id="sentReportRows"></tbody></table></div>
     </section>
-    <section id="snapshotDetail" hidden><div class="head"><h1>发送快照详情</h1><button class="ghost" type="button" id="backToSentReports">返回列表</button></div><div class="report-detail-grid"><div class="panel"><h2 id="snapshotTitle"></h2><div id="snapshotFields"></div></div><div class="panel report-qr-panel"><span class="qr-brand">淘房小程序</span><strong>历史报告小程序码</strong><img id="snapshotQr" alt="历史报告小程序码演示图"><p id="snapshotStatusTip"></p><button class="ghost" type="button" id="openSnapshot">打开客户页示例</button></div></div></section>
     <section id="config" hidden>
       <div class="head"><h1>说明与须知</h1><span class="scope">对所有城市生效</span></div>
       <div class="config-tabs">
@@ -85,16 +85,12 @@
         </div>
       </div>
     </section>
-    <section id="reportDetail" hidden>
-      <div class="head"><h1>报告详情</h1><button class="ghost" type="button" id="backToReports">返回列表</button></div>
-      <div class="report-detail-grid">
-        <div class="panel"><h2 id="reportDetailTitle"></h2><div id="reportDetailFields"></div></div>
-        <div class="panel report-qr-panel"><span class="qr-brand">淘房小程序</span><strong>当前报告小程序码</strong><img id="reportQr" alt="当前报告小程序码演示图"><p>扫码查看客户所见的报告页面</p></div>
-      </div>
-    </section>
     <div class="panel" id="unavailable" hidden>当前账号无权访问该页面。</div>
   </main>
 </div>
+<dialog id="availabilityDialog" class="availability-dialog"><form id="availabilityForm" method="dialog"><h2 id="availabilityTitle"></h2><p id="availabilityImpact"></p><label id="availabilityReasonLabel">禁用原因<textarea id="availabilityReason" maxlength="200" placeholder="请简要说明处理原因"></textarea></label><div class="error" id="availabilityError" role="alert"></div><div class="actions"><button class="ghost" type="button" id="availabilityCancel">取消</button><button class="primary" type="submit" id="availabilitySubmit">确认禁用</button></div></form></dialog>
+<dialog id="historyDialog" class="availability-dialog"><div class="dialog-body"><h2 id="historyTitle">操作记录</h2><div id="historyList" class="history-list"></div><div class="actions"><button class="ghost" type="button" id="historyClose">关闭</button></div></div></dialog>
+<dialog id="qrDialog" class="availability-dialog qr-dialog"><div class="dialog-body"><h2 id="qrTitle">淘房小程序码</h2><img id="qrImage" alt="淘房小程序码演示图"><p id="qrTip"></p><div class="actions"><button class="ghost" type="button" id="qrClose">关闭</button><button class="primary" type="button" id="qrOpen">打开客户页示例</button></div></div></dialog>
 <script src="../report-shared.js"></script>
 <script>
 const byId = id => document.getElementById(id);
@@ -144,20 +140,54 @@ function canManageAvailability(asset) {
     && access.manageCities.includes(asset.city);
 }
 function assetRef(asset) { return asset.ref || 'admin-asset-' + asset.id; }
+function recordAvailabilityAction(kind,id,action,reason='') { const key='demo-availability-actions';const records=JSON.parse(localStorage.getItem(key)||'[]');records.unshift({kind,id,action,reason,operator:'jiangzhongtian',time:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(records)); }
+function openActionHistory(kind,id) {
+  const records=JSON.parse(localStorage.getItem('demo-availability-actions')||'[]').filter(item=>item.kind===kind&&item.id===id);
+  byId('historyTitle').textContent=kind+'操作记录';
+  const list=byId('historyList');list.replaceChildren();
+  if(!records.length) list.append(make('p','','暂无操作记录'));
+  for(const record of records){
+    const item=make('div','action-history-item');
+    item.append(make('b','',record.action),make('small','',record.operator+' · '+new Date(record.time).toLocaleString('zh-CN')));
+    if(record.reason)item.append(make('p','','原因：'+record.reason));
+    list.append(item);
+  }
+  byId('historyDialog').showModal();
+}
+let pendingAvailabilityAction=null;
+function openAvailabilityDialog({kind,disabling,impact,onConfirm}){
+  byId('availabilityTitle').textContent=(disabling?'禁用':'恢复')+kind;
+  byId('availabilityImpact').textContent=impact;
+  byId('availabilityReasonLabel').hidden=!disabling;
+  byId('availabilityReason').value='';
+  byId('availabilityError').textContent='';
+  byId('availabilitySubmit').textContent='确认'+(disabling?'禁用':'恢复');
+  pendingAvailabilityAction={disabling,onConfirm};
+  byId('availabilityDialog').showModal();
+  if(disabling)byId('availabilityReason').focus();
+}
+byId('availabilityCancel').onclick=()=>byId('availabilityDialog').close();
+byId('availabilityForm').onsubmit=event=>{
+  event.preventDefault();
+  const reason=byId('availabilityReason').value.trim();
+  if(pendingAvailabilityAction?.disabling&&!reason){byId('availabilityError').textContent='请填写禁用原因';byId('availabilityReason').focus();return}
+  const action=pendingAvailabilityAction;byId('availabilityDialog').close();pendingAvailabilityAction=null;action?.onConfirm(reason);
+};
+byId('historyClose').onclick=()=>byId('historyDialog').close();
+byId('qrClose').onclick=()=>byId('qrDialog').close();
 function usageStatus(asset) { const deleted=ReportPrototype.isDeleted(assetRef(asset)),disabled=ReportPrototype.isDisabled(assetRef(asset));return deleted?(disabled?'经纪人已删除 · 已禁用':'经纪人已删除'):disabled?'已禁用':'可用'; }
 function toggleAvailability(asset) {
   if (currentPage !== 'library' || !canManageAvailability(asset)) return;
   const disable = !ReportPrototype.isDisabled(assetRef(asset));
   const deleted=ReportPrototype.isDeleted(assetRef(asset));
-  const message = disable
-    ? deleted?'禁用后，历史报告将隐藏此素材。确定禁用？':'禁用后，经纪人无法选择此素材，历史报告也会隐藏此素材。确定禁用？'
-    : deleted?'恢复后，历史报告可重新展示此素材；素材仍保留经纪人已删除状态。确定恢复？':'恢复后，经纪人可再次选择此素材，引用它的报告将重新展示。确定恢复？';
-  if (!confirm(message)) return;
-  if (!ReportPrototype.setDisabled(assetRef(asset), disable)) {
-    alert('操作未完成，请重试');
-    return;
-  }
-  renderList('library');
+  const impact = disable
+    ? deleted?'历史报告将隐藏此素材。经纪人已删除状态保持不变。':'经纪人将无法选择此素材，历史报告也会隐藏此素材。'
+    : deleted?'历史报告可重新展示此素材。经纪人已删除状态保持不变。':'经纪人可再次选择此素材，引用它的报告将重新展示。';
+  openAvailabilityDialog({kind:'素材',disabling:disable,impact,onConfirm:reason=>{
+    if (!ReportPrototype.setDisabled(assetRef(asset), disable)) {alert('操作未完成，请重试');return}
+    recordAvailabilityAction('素材',assetRef(asset),disable?'禁用':'恢复',reason);
+    renderList('library');
+  }});
 }
 function assetName(asset) {
   const [date, time] = asset.time.split(' ');
@@ -196,7 +226,8 @@ function renderList(page) {
     const row=rows.insertRow();const img=make('img','lib-thumb');img.src='../app/'+asset.image;img.alt='素材预览';row.insertCell().append(img);
     for(const value of [assetName(asset),asset.roleId,asset.name,asset.type,asset.source,asset.time])row.insertCell().textContent=value;
     const status=usageStatus(asset);row.insertCell().append(make('span','pill'+(status==='可用'?'':' no'),status));
-        const actions=row.insertCell();const view=make('button','link','查看');view.addEventListener('click',()=>openDetail(asset.id));actions.append(view);
+    const actions=row.insertCell();const view=make('button','link','查看');view.addEventListener('click',()=>openDetail(asset.id));actions.append(view);
+    const history=make('button','link','操作记录');history.style.marginLeft='12px';history.onclick=()=>openActionHistory('素材',assetRef(asset));actions.append(history);
     if(canManageAvailability(asset)){const toggle=make('button','link',ReportPrototype.isDisabled(assetRef(asset))?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.addEventListener('click',()=>toggleAvailability(asset));actions.append(toggle)}
   }
 }
@@ -226,11 +257,12 @@ function renderReports() {
     view.addEventListener('click', () => openReportDetail(report.id));
     const actions=row.insertCell();actions.append(view);
     const history=make('button','link','发送记录');history.style.marginLeft='12px';history.onclick=()=>{activeReportId=report.id;byId('reports').hidden=true;openSentRecords()};actions.append(history);
-    if(!sentReports.some(x=>x.reportId===report.id&&x.deleted)){const toggle=make('button','link',reportDisabled.has(report.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{if(!confirm((reportDisabled.has(report.id)?'恢复':'禁用')+'报告「'+report.title+'」？禁用后经纪人端不可见，所有历史快照不可查看。'))return;if(!reportDisabled.has(report.id)&&!prompt('请输入禁用原因'))return;reportDisabled.has(report.id)?reportDisabled.delete(report.id):reportDisabled.add(report.id);persistReportStates();renderReports()};actions.append(toggle)}
+    const actionLog=make('button','link','操作记录');actionLog.style.marginLeft='12px';actionLog.onclick=()=>openActionHistory('报告',report.id);actions.append(actionLog);
+    if(!sentReports.some(x=>x.reportId===report.id&&x.deleted)){const toggle=make('button','link',reportDisabled.has(report.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{const disabling=!reportDisabled.has(report.id);openAvailabilityDialog({kind:'报告',disabling,impact:disabling?'经纪人端将显示不可用占位，所有历史快照不可查看。':'报告将恢复可用；单独禁用的快照仍不可查看。',onConfirm:reason=>{disabling?reportDisabled.add(report.id):reportDisabled.delete(report.id);recordAvailabilityAction('报告',report.id,disabling?'禁用':'恢复',reason);persistReportStates();renderReports()}})};actions.append(toggle)}
   }
 }
 
-function openSentRecords(){const report=reports.find(x=>x.id===activeReportId&&x.city===citySelect.value);if(!report)return;byId('reportDetail').hidden=true;byId('snapshotDetail').hidden=true;byId('sentReports').hidden=false;byId('sentReportsTitle').textContent='发送记录 · '+report.title;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告管理 / '+report.title+' / 发送记录';renderSentReports()}
+function openSentRecords(){const report=reports.find(x=>x.id===activeReportId&&x.city===citySelect.value);if(!report)return;byId('sentReports').hidden=false;byId('sentReportsTitle').textContent='发送记录 · '+report.title;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告管理 / '+report.title+' / 发送记录';renderSentReports()}
 function renderSentReports(){
   const rows=byId('sentReportRows');rows.replaceChildren();
   if(!activeReportId||!canUse('sentReports'))return;
@@ -243,51 +275,37 @@ function renderSentReports(){
     const ownDisabled=snapshotDisabled.has(record.id),parentDisabled=reportDisabled.has(record.reportId);
     row.insertCell().textContent=ownDisabled?(parentDisabled?'已禁用（报告也已禁用）':'已禁用'):parentDisabled?'可用（报告已禁用）':'可用';
     const op=row.insertCell();
-    const view=make('button','link','扫码查看');view.onclick=()=>openSnapshotDetail(record);op.append(view);
+    const view=make('button','link','查看');view.onclick=()=>openSnapshotDetail(record);op.append(view);
+    const history=make('button','link','操作记录');history.style.marginLeft='12px';history.onclick=()=>openActionHistory('快照',record.id);op.append(history);
     const toggle=make('button','link',ownDisabled?'恢复':'禁用');toggle.style.marginLeft='12px';
     toggle.onclick=()=>{
-      if(!confirm((snapshotDisabled.has(record.id)?'恢复':'禁用')+'这次发送快照？'))return;
-      if(!snapshotDisabled.has(record.id)&&!prompt('请输入禁用原因'))return;
-      snapshotDisabled.has(record.id)?snapshotDisabled.delete(record.id):snapshotDisabled.add(record.id);
-      persistReportStates();renderSentReports();
+      const disabling=!snapshotDisabled.has(record.id);
+      openAvailabilityDialog({kind:'发送快照',disabling,impact:disabling?'客户打开本次历史卡片时，将看到报告暂不可查看页面。':'若所属报告可用，客户可再次查看本次历史快照。',onConfirm:reason=>{
+        disabling?snapshotDisabled.add(record.id):snapshotDisabled.delete(record.id);
+        recordAvailabilityAction('快照',record.id,disabling?'禁用':'恢复',reason);
+        persistReportStates();renderSentReports();
+      }});
     };
     op.append(toggle);
   }
 }
-let currentSnapshot=null;
-function openSnapshotDetail(record){currentSnapshot=record;byId('sentReports').hidden=true;byId('snapshotDetail').hidden=false;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告管理 / '+record.title+' / 发送记录 / 扫码查看';byId('snapshotTitle').textContent='本次发送';const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);byId('snapshotFields').textContent='发送时间：'+record.time+'  ·  接收用户 788 ID：'+record.recipient788Id;byId('snapshotStatusTip').textContent=disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页';byId('snapshotQr').src=disabled?'qr-report-unavailable.png':reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png'}
-byId('backToSentReports').onclick=()=>openSentRecords();
+function openSnapshotDetail(record){const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);openQrDialog({title:'历史报告小程序码',image:disabled?'qr-report-unavailable.png':reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png',tip:disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页',url:'https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+record.reportId+(disabled?'&disabled=1':'')})}
 byId('backFromSentReports').onclick=()=>showPage('reports');
-byId('openSnapshot').onclick=()=>{if(!currentSnapshot)return;const sample=currentSnapshot.reportId;const disabled=reportDisabled.has(sample)||snapshotDisabled.has(currentSnapshot.id);window.open('https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+sample+(disabled?'&disabled=1':''),'_blank')};
+function openQrDialog({title,image,tip,url}){byId('qrTitle').textContent=title;byId('qrImage').hidden=!image;byId('qrImage').src=image;byId('qrTip').textContent=tip;byId('qrOpen').hidden=!url;byId('qrOpen').onclick=()=>window.open(url,'_blank');byId('qrDialog').showModal()}
 function openReportDetail(id) {
   if (currentPage !== 'reports' || !canUse('reports')) return;
-  activeReportId=id;
   const report = reports.find(item => item.id === id && item.city === citySelect.value);
   if (!report) return;
-  byId('reports').hidden = true;
-  byId('sentReports').hidden = true;
-  byId('snapshotDetail').hidden = true;
-  byId('reportDetail').hidden = false;
-  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / 报告管理 / 报告详情';
-  byId('reportDetailTitle').textContent = report.title;
-  const fields = [['角色 ID',report.roleId],['编辑人',report.editor],['所属城市',report.city],['创建时间',report.createdAt],['最近编辑时间',report.updatedAt],['报告状态',reportDisabled.has(report.id)?'已禁用':sentReports.some(x=>x.reportId===report.id&&x.deleted)?'经纪人已删除':'可用']];
-  byId('reportDetailFields').replaceChildren(...fields.map(([label,value]) => {
-    const row = make('div','kv');
-    row.append(make('span','',label),make('b','',value));
-    return row;
-  }));
-  byId('reportQr').src = reportDisabled.has(report.id) ? 'qr-report-unavailable.png' : report.qr;
-  const deleted=sentReports.some(x=>x.reportId===report.id&&x.deleted);byId('reportQr').hidden=deleted;byId('reportQr').parentElement.querySelector('strong').textContent=deleted?'当前报告已删除':'当前报告小程序码';byId('reportQr').parentElement.querySelector('p').textContent=deleted?'可从报告列表进入发送记录查看历史快照':'扫码查看客户所见的报告页面';
-  byId('reportQr').alt = report.title + '小程序码演示图';
+  const deleted=sentReports.some(x=>x.reportId===report.id&&x.deleted);
+  openQrDialog({title:report.title,image:deleted?'':reportDisabled.has(report.id)?'qr-report-unavailable.png':report.qr,tip:deleted?'当前报告已被经纪人删除。可从「发送记录」查看历史快照。':'扫码查看客户所见的报告页面',url:deleted?'':'https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+report.id+(reportDisabled.has(report.id)?'&disabled=1':'')});
+  byId('qrImage').hidden=deleted;
 }
 
 function showPage(page) {
   currentPage = page;
   currentAsset = null;
   byId('detail').hidden = true;
-  byId('reportDetail').hidden = true;
   byId('sentReports').hidden = true;
-  byId('snapshotDetail').hidden = true;
   byId('unavailable').hidden = canUse(page);
   for (const link of document.querySelectorAll('[data-page]')) {
     const value = link.dataset.page;
@@ -398,7 +416,6 @@ for (const page of ['library', 'reports']) {
   });
 }
 byId('backToList').addEventListener('click', () => showPage(currentPage));
-byId('backToReports').addEventListener('click', () => showPage('reports'));
 for (const button of document.querySelectorAll('[data-config-kind]')) {
   button.addEventListener('click', () => switchConfig(button.dataset.configKind));
 }
