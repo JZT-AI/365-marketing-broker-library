@@ -141,16 +141,17 @@ function canUse(page) {
 }
 function canManageAvailability(asset) {
   return canUse('library') && asset.city === citySelect.value
-    && access.manageCities.includes(asset.city) && !ReportPrototype.isDeleted(assetRef(asset));
+    && access.manageCities.includes(asset.city);
 }
 function assetRef(asset) { return asset.ref || 'admin-asset-' + asset.id; }
-function usageStatus(asset) { return ReportPrototype.isDeleted(assetRef(asset)) ? '经纪人已删除' : ReportPrototype.isDisabled(assetRef(asset)) ? '已禁用' : '可用'; }
+function usageStatus(asset) { const deleted=ReportPrototype.isDeleted(assetRef(asset)),disabled=ReportPrototype.isDisabled(assetRef(asset));return deleted?(disabled?'经纪人已删除 · 已禁用':'经纪人已删除'):disabled?'已禁用':'可用'; }
 function toggleAvailability(asset) {
   if (currentPage !== 'library' || !canManageAvailability(asset)) return;
   const disable = !ReportPrototype.isDisabled(assetRef(asset));
+  const deleted=ReportPrototype.isDeleted(assetRef(asset));
   const message = disable
-    ? '禁用后，经纪人无法选择此素材，客户报告也会隐藏此素材。确定禁用？'
-    : '恢复后，经纪人可再次选择此素材，引用它的报告将重新展示。确定恢复？';
+    ? deleted?'禁用后，历史报告将隐藏此素材。确定禁用？':'禁用后，经纪人无法选择此素材，历史报告也会隐藏此素材。确定禁用？'
+    : deleted?'恢复后，历史报告可重新展示此素材；素材仍保留经纪人已删除状态。确定恢复？':'恢复后，经纪人可再次选择此素材，引用它的报告将重新展示。确定恢复？';
   if (!confirm(message)) return;
   if (!ReportPrototype.setDisabled(assetRef(asset), disable)) {
     alert('操作未完成，请重试');
@@ -196,7 +197,7 @@ function renderList(page) {
     for(const value of [assetName(asset),asset.roleId,asset.name,asset.type,asset.source,asset.time])row.insertCell().textContent=value;
     const status=usageStatus(asset);row.insertCell().append(make('span','pill'+(status==='可用'?'':' no'),status));
         const actions=row.insertCell();const view=make('button','link','查看');view.addEventListener('click',()=>openDetail(asset.id));actions.append(view);
-    if(canManageAvailability(asset)){const toggle=make('button','link',status==='已禁用'?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.addEventListener('click',()=>toggleAvailability(asset));actions.append(toggle)}
+    if(canManageAvailability(asset)){const toggle=make('button','link',ReportPrototype.isDisabled(assetRef(asset))?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.addEventListener('click',()=>toggleAvailability(asset));actions.append(toggle)}
   }
 }
 function renderReports() {
