@@ -121,6 +121,19 @@ const reports = [
   { id: 'R002', city: '西安', roleId: 'B30021', editor: '王顾问', title: '西安三房看房参考', createdAt: '2026-11-16 16:00', updatedAt: '2026-11-17 10:38', floors: [{title:'房源推荐',count:2},{title:'实景照片',count:2},{title:'实拍视频',count:1}], qr: 'qr-report-xian.png' },
   { id: 'R003', city: '南京', roleId: 'B10086', editor: '张顾问', title: '周末现场讲解视频', createdAt: '2026-11-17 09:40', updatedAt: '2026-11-17 09:52', floors: [{title:'实拍视频',count:2}], qr: 'qr-report-video.png' }
 ];
+try {
+  if(localStorage.getItem('smallb-admin-availability-example-seeded')!=='1'){
+    ReportPrototype.setDisabled('asset-6',true);
+    const disabledReports=new Set(JSON.parse(localStorage.getItem('demo-disabled-reports')||'[]'));
+    disabledReports.add('R002');
+    localStorage.setItem('demo-disabled-reports',JSON.stringify([...disabledReports]));
+    const history=JSON.parse(localStorage.getItem('demo-availability-actions')||'[]');
+    if(!history.some(item=>item.kind==='素材'&&item.id==='asset-6'))history.push({kind:'素材',id:'asset-6',action:'禁用',reason:'演示素材：不适合继续展示',operator:'演示运营',time:'2026-11-17T10:30:00+08:00'});
+    if(!history.some(item=>item.kind==='报告'&&item.id==='R002'))history.push({kind:'报告',id:'R002',action:'禁用',reason:'演示报告：暂停展示',operator:'演示运营',time:'2026-11-17T10:35:00+08:00'});
+    localStorage.setItem('demo-availability-actions',JSON.stringify(history));
+    localStorage.setItem('smallb-admin-availability-example-seeded','1');
+  }
+} catch {}
 const search = { library: {}, reports: {} };
 let activeReportId=null;
 const reportDisabled=new Set(JSON.parse(localStorage.getItem('demo-disabled-reports')||'[]'));
@@ -289,7 +302,10 @@ function renderSentReports(){
     op.append(toggle);
   }
 }
-function openSnapshotDetail(record){const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);openQrDialog({title:'历史报告小程序码',image:disabled?'qr-report-unavailable.png':reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png',tip:disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页',url:'https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+record.reportId+(disabled?'&disabled=1':'')})}
+const sampleMediaRefs={R001:['asset-1','asset-5'],R002:['asset-1','asset-5','asset-2'],R003:['asset-2','asset-6']};
+function reportSampleUrl(id,disabled=false){const url=new URL('https://jzt-ai.github.io/365-taofang-exclusive-report/report/');url.searchParams.set('sample',id);if(disabled)url.searchParams.set('disabled','1');else {const refs=(sampleMediaRefs[id]||[]).filter(ref=>ReportPrototype.isDisabled(ref));if(refs.length)url.searchParams.set('disabledAssets',refs.join(','))}return url.href}
+function reportSampleQr(report,disabled=false){if(disabled)return 'qr-report-unavailable.png';if(report.id==='R003'&&ReportPrototype.isDisabled('asset-6'))return 'qr-report-video-disabled-asset.png';return report.qr}
+function openSnapshotDetail(record){const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id),report=reports.find(x=>x.id===record.reportId);openQrDialog({title:'历史报告小程序码',image:reportSampleQr(report||{id:record.reportId,qr:'qr-report-xian.png'},disabled),tip:disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页',url:reportSampleUrl(record.reportId,disabled)})}
 byId('backFromSentReports').onclick=()=>showPage('reports');
 function openQrDialog({title,image,tip,url}){byId('qrTitle').textContent=title;byId('qrImage').hidden=!image;byId('qrImage').src=image;byId('qrTip').textContent=tip;byId('qrOpen').hidden=!url;byId('qrOpen').onclick=()=>window.open(url,'_blank');byId('qrDialog').showModal()}
 function openReportDetail(id) {
@@ -297,7 +313,7 @@ function openReportDetail(id) {
   const report = reports.find(item => item.id === id && item.city === citySelect.value);
   if (!report) return;
   const deleted=sentReports.some(x=>x.reportId===report.id&&x.deleted);
-  openQrDialog({title:report.title,image:deleted?'':reportDisabled.has(report.id)?'qr-report-unavailable.png':report.qr,tip:deleted?'当前报告已被经纪人删除。可从「发送记录」查看历史快照。':'扫码查看客户所见的报告页面',url:deleted?'':'https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+report.id+(reportDisabled.has(report.id)?'&disabled=1':'')});
+  openQrDialog({title:report.title,image:deleted?'':reportSampleQr(report,reportDisabled.has(report.id)),tip:deleted?'当前报告已被经纪人删除。可从「发送记录」查看历史快照。':'扫码查看客户所见的报告页面',url:deleted?'':reportSampleUrl(report.id,reportDisabled.has(report.id))});
   byId('qrImage').hidden=deleted;
 }
 
