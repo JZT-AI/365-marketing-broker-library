@@ -267,13 +267,13 @@ function renderReports() {
     row.insertCell().append(make('span', 'report-name', report.title));
     for (const value of [report.roleId, report.editor]) row.insertCell().textContent = value;
         row.insertCell().textContent = report.updatedAt;
-    row.insertCell().textContent=reportDisabled.has(report.id)?'已禁用':sentReports.some(x=>x.reportId===report.id&&x.deleted)?'安家顾问已删除':'可用';
+    row.insertCell().textContent=reportDisabled.has(report.id)?(sentReports.some(x=>x.reportId===report.id&&x.deleted)?'已删除 · 已禁用':'已禁用'):sentReports.some(x=>x.reportId===report.id&&x.deleted)?'安家顾问已删除':'可用';
     const view = make('button', 'link', '查看');
     view.addEventListener('click', () => openReportDetail(report.id));
     const actions=row.insertCell();actions.append(view);
     const history=make('button','link','发送记录');history.style.marginLeft='12px';history.onclick=()=>{activeReportId=report.id;byId('reports').hidden=true;openSentRecords()};actions.append(history);
     const actionLog=make('button','link','操作记录');actionLog.style.marginLeft='12px';actionLog.onclick=()=>openActionHistory('报告',report.id);actions.append(actionLog);
-    if(!sentReports.some(x=>x.reportId===report.id&&x.deleted)){const toggle=make('button','link',reportDisabled.has(report.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{const disabling=!reportDisabled.has(report.id);openAvailabilityDialog({kind:'报告',disabling,impact:disabling?'安家顾问端将显示不可用占位，所有历史快照不可查看。':'报告将恢复可用；所属快照重新可查看。',onConfirm:reason=>{disabling?reportDisabled.add(report.id):reportDisabled.delete(report.id);recordAvailabilityAction('报告',report.id,disabling?'禁用':'恢复',reason);persistReportStates();renderReports()}})};actions.append(toggle)}
+    {const toggle=make('button','link',reportDisabled.has(report.id)?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.onclick=()=>{const disabling=!reportDisabled.has(report.id);openAvailabilityDialog({kind:'报告',disabling,impact:disabling?'所有历史快照不可查看；未删除报告在安家顾问端显示不可用占位。':'历史快照重新可查看；已删除报告仍不会回到安家顾问端。',onConfirm:reason=>{disabling?reportDisabled.add(report.id):reportDisabled.delete(report.id);recordAvailabilityAction('报告',report.id,disabling?'禁用':'恢复',reason);persistReportStates();renderReports()}})};actions.append(toggle)}
   }
 }
 
