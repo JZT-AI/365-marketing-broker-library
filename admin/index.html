@@ -1,0 +1,408 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>资料库管理｜365营销平台</title><style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#263449;background:#f4f7fa}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{height:94px;background:linear-gradient(90deg,#27b7d8,#4397f8);display:flex;align-items:stretch;color:#fff}.brand{width:205px;display:flex;align-items:center;padding:0 28px;font-size:20px;font-weight:800}.topnav{display:flex;gap:3px;overflow:auto}.topnav button{border:0;background:transparent;color:#fff;min-width:104px;padding:13px 11px;font-size:13px;font-weight:700;opacity:.86}.topnav button b{display:block;font-size:25px;margin-bottom:5px}.topnav button.active{background:#ffffff24;border-top:4px solid #82f0ff;opacity:1}.user{margin-left:auto;min-width:230px;display:grid;place-items:center;font-size:12px}.shell{display:flex;min-height:calc(100vh - 94px)}.side{width:205px;background:#363653;color:#e1e3ed;padding:20px 0;flex:none}.side a{display:block;padding:14px 22px;font-size:13px;color:inherit;text-decoration:none}.side a.active{background:#464767;color:#fff;border-left:3px solid #36bdec}.main{flex:1;padding:28px 34px}.crumb{font-size:12px;color:#8391a2;margin-bottom:16px}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.head h1{font-size:22px;margin:0}.head small{color:#8a96a5}.panel{background:#fff;border:1px solid #e5ebf2;border-radius:12px;box-shadow:0 10px 30px #33415508;padding:19px;margin-bottom:14px}.filters{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.filters label{display:grid;gap:6px;color:#788596;font-size:12px}.filters input,.filters select{height:36px;border:1px solid #dfe5ed;border-radius:6px;padding:0 10px;min-width:150px;color:#344054;background:#fff}.primary{border:0;background:#399de8;color:#fff;padding:9px 18px;border-radius:6px}.ghost{border:1px solid #dce6ee;background:#fff;color:#3d6988;padding:8px 14px;border-radius:6px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{color:#778497;background:#f8fafc;font-weight:650}.pill{padding:4px 8px;border-radius:5px;background:#e9f8ef;color:#19835a;font-size:11px}.pill.wait{background:#fff3dd;color:#a87000}.pill.no{background:#ffeded;color:#c84b4b}.link{border:0;background:none;color:#288bc8;padding:3px}.detail{display:none}.detail.open{display:block}.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:17px}.preview{background:#f1f5fa;border:1px dashed #cbd8e6;min-height:245px;display:grid;place-items:center;border-radius:10px;color:#789}.kv{display:grid;grid-template-columns:110px 1fr;gap:12px;font-size:13px;margin:12px 0}.kv span:first-child{color:#8994a4}.actions{display:flex;gap:8px;margin-top:22px}.notice{font-size:12px;color:#9a6476;background:#fff5f8;padding:10px;border-radius:6px;margin-top:14px}@media(max-width:800px){.side{display:none}.main{padding:18px}.grid{grid-template-columns:1fr}.user{display:none}}
+.lib-thumb{width:46px;height:46px;object-fit:cover;border-radius:7px;display:block}.preview img{width:100%;height:245px;object-fit:cover;border-radius:10px}.config-tabs{display:flex;gap:9px;margin-bottom:14px}.config-tabs button{padding:9px 18px;border:1px solid #d8e3eb;background:#fff;border-radius:7px;color:#567}.config-tabs button.on{background:#eaf5ff;border-color:#83c2ec;color:#208ac9}.rich-toolbar{display:flex;gap:7px;padding:8px;background:#f5f8fb;border:1px solid #dce5ed;border-bottom:0;border-radius:8px 8px 0 0}.rich-toolbar button{min-width:32px;height:30px;background:#fff;border:1px solid #dce4ec;border-radius:5px}.rich-editor{min-height:180px;border:1px solid #dce5ed;border-radius:0 0 8px 8px;padding:15px;outline:0;line-height:1.65;font-size:14px}.config-preview{min-height:70px;background:#f9fbfd;border:1px solid #e5ebf1;border-radius:8px;padding:14px;margin-top:15px;line-height:1.6;font-size:13px}.config-tip{font-size:12px;color:#8896a4;margin:10px 0 18px}
+[hidden]{display:none!important}.main{min-width:0}.user{display:flex;justify-content:center;gap:12px}.city-switch{appearance:auto;color:#fff;background:#176abe;border:1px solid #ffffff50;border-radius:5px;padding:5px}.city-switch option{color:#263449;background:#fff}.scope{color:#426481;font-size:13px}.head .scope{margin-left:8px}.field-input{width:100%;height:36px;margin-top:6px;border:1px solid #dfe5ed;border-radius:5px;padding:8px}.table-empty{text-align:center;padding:26px;color:#62738b}.preview video{width:100%;max-height:360px;border-radius:9px}.preview img{height:auto;max-height:360px;object-fit:contain}.rich-editor:focus-visible{outline:2px solid #399de8}
+.detail-fields-title{font-size:14px;color:#34465e;margin:21px 0 8px;padding-top:16px;border-top:1px solid #e8edf3}
+.report-name{font-weight:700;color:#273d55}.report-modules{color:#6c7e90}.report-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}.report-detail-grid .panel{margin:0}.report-detail-grid h2{margin:0 0 16px;font-size:17px}.report-floor-list{display:grid;gap:9px;margin-top:10px}.report-floor{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid #e5ebf2;border-radius:8px;background:#f9fbfd;color:#304256;font-size:13px}.report-floor small{color:#8493a4}.report-qr-panel{text-align:center}.report-qr-panel img{display:block;width:248px;height:248px;max-width:100%;margin:14px auto;padding:9px;border:1px solid #e5ebf2;border-radius:10px;background:#fff;image-rendering:pixelated}.report-qr-panel p{margin:10px 0;color:#77889b;font-size:12px}.report-qr-panel strong{display:block;font-size:14px;color:#33465d}@media(max-width:900px){.report-detail-grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header class="top">
+  <div class="brand">365营销平台</div>
+  <nav class="topnav">
+    <button><b>⚙</b>系统管理</button><button><b>▤</b>任务管理</button>
+    <button><b>♟</b>活动管理</button><button><b>♧</b>素材管理</button>
+    <button><b>▣</b>内容营销</button><button><b>▤</b>课程管理</button>
+    <button><b>▣</b>卡券管理</button><button class="active"><b>▦</b>资料库管理</button>
+  </nav>
+  <div class="user">
+    <select id="citySelect" class="city-switch" aria-label="当前工作城市"></select>
+    <span>jiangzhongtian</span>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side" aria-label="资料库管理">
+    <a href="#library" data-page="library">素材管理</a>
+    <a href="#reports" data-page="reports">报告查询</a>
+    <a href="#config" data-page="config">说明与须知</a>
+  </aside>
+  <main class="main">
+    <div class="crumb" id="breadcrumb"></div>
+    <section id="library" hidden>
+      <div class="head"><h1>素材管理</h1></div>
+      <form class="panel filters" id="libraryFilters">
+        <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
+        <label>素材分类<select name="type"><option>全部</option><option>图片</option><option>视频</option></select></label>
+        <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
+      </form>
+      <div class="panel tablewrap">
+        <table><thead><tr><th>素材预览</th><th>素材名称</th><th>角色 ID</th><th>姓名</th><th>素材分类</th><th>上传场景</th><th>上传时间</th><th>使用状态</th><th>备注</th><th>操作</th></tr></thead><tbody id="libraryRows"></tbody></table>
+      </div>
+    </section>
+    <section id="reports" hidden>
+      <div class="head"><h1>报告查询</h1></div>
+      <form class="panel filters" id="reportsFilters">
+        <label>报告名称<input name="title" placeholder="输入报告名称"></label>
+        <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
+        <label>编辑人<input name="editor" placeholder="输入姓名"></label>
+        <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
+      </form>
+      <div class="panel tablewrap">
+        <table><thead><tr><th>报告名称</th><th>角色 ID</th><th>编辑人</th><th>内容模块</th><th>最近编辑时间</th><th>操作</th></tr></thead><tbody id="reportsRows"></tbody></table>
+      </div>
+    </section>
+    <section id="config" hidden>
+      <div class="head"><h1>说明与须知</h1><span class="scope">对所有城市生效</span></div>
+      <div class="config-tabs">
+        <button type="button" data-config-kind="help">功能说明</button>
+        <button type="button" data-config-kind="notice">素材免责须知</button>
+      </div>
+      <div class="panel">
+        <h3 id="configTitle"></h3>
+        <p class="config-tip" id="configTip"></p>
+        <div class="rich-toolbar">
+          <button type="button" data-format="bold" title="加粗"><b>B</b></button>
+          <button type="button" data-format="italic" title="斜体"><i>I</i></button>
+          <button type="button" data-format="insertUnorderedList" title="项目符号">☷</button>
+          <button type="button" data-format="createLink">链接</button>
+        </div>
+        <div id="configEditor" class="rich-editor" contenteditable="true" aria-label="富文本内容"></div>
+        <div class="actions"><button class="ghost" type="button" id="previewConfig">预览</button><button class="primary" type="button" id="saveConfig">保存</button></div>
+        <div class="config-preview" id="configPreview" hidden></div>
+      </div>
+    </section>
+    <section id="detail" hidden>
+      <div class="head"><h1 id="detailTitle"></h1><button class="ghost" type="button" id="backToList">返回列表</button></div>
+      <div class="grid">
+        <div class="panel"><div class="preview" id="detailPreview"></div></div>
+        <div class="panel">
+          <div id="detailFields"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="reportDetail" hidden>
+      <div class="head"><h1>报告详情</h1><button class="ghost" type="button" id="backToReports">返回列表</button></div>
+      <div class="report-detail-grid">
+        <div class="panel"><h2 id="reportDetailTitle"></h2><div id="reportDetailFields"></div><h3 class="detail-fields-title">报告内容</h3><div class="report-floor-list" id="reportDetailFloors"></div></div>
+        <div class="panel report-qr-panel"><strong>扫码查看报告</strong><img id="reportQr" alt="报告预览二维码"><p>使用手机扫码，在淘房小程序报告原型中查看</p></div>
+      </div>
+    </section>
+    <div class="panel" id="unavailable" hidden>当前账号无权访问该页面。</div>
+  </main>
+</div>
+<script src="../report-shared.js"></script>
+<script>
+const byId = id => document.getElementById(id);
+const citySelect = byId('citySelect');
+// Standalone prototype permission scenarios: ?profile=city, ?profile=view, ?profile=platform.
+const profiles = {
+  all: { cities: ['南京', '西安'], manageCities: ['南京', '西安'], reportCities: ['南京', '西安'], editShared: true },
+  city: { cities: ['西安'], manageCities: ['西安'], reportCities: ['西安'], editShared: false },
+  view: { cities: ['西安'], manageCities: [], reportCities: [], editShared: false },
+  platform: { cities: [], manageCities: [], reportCities: [], editShared: true }
+};
+const profileKey = new URLSearchParams(location.search).get('profile');
+const access = Object.hasOwn(profiles, profileKey) ? profiles[profileKey] : profiles.all;
+const pageNames = { library: '素材管理', reports: '报告查询', config: '说明与须知' };
+const assets = [
+  {id:1,ref:'asset-3',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-17 08:02',image:'thumb-community.jpg'},
+  {id:2,city:'南京',roleId:'B20415',name:'李顾问',type:'视频',source:'素材库上传',time:'11-17 09:31',image:'thumb-video.jpg'},
+  {id:3,ref:'asset-1',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-17 09:42',image:'thumb-living.jpg'},
+  {id:4,ref:'asset-2',city:'南京',roleId:'B10086',name:'张顾问',type:'视频',source:'会话发送',time:'11-17 09:31',image:'thumb-video.jpg'},
+  {id:5,ref:'asset-5',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-16 16:06',image:'thumb-community.jpg'},
+  {id:6,city:'西安',roleId:'B30021',name:'王顾问',type:'图片',source:'素材库上传',time:'11-17 10:18',image:'thumb-skyline.jpg'},
+  {id:7,city:'西安',roleId:'B30021',name:'王顾问',type:'图片',source:'素材库上传',time:'11-17 09:23',image:'thumb-community.jpg'},
+  {id:8,ref:'asset-6',city:'南京',roleId:'B10086',name:'张顾问',type:'视频',source:'素材库上传',time:'11-15 14:25',image:'thumb-skyline.jpg'},
+  {id:9,ref:'asset-4',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'会话发送',time:'11-16 17:20',image:'thumb-skyline.jpg'}
+];
+const reports = [
+  { id: 'R001', city: '南京', roleId: 'B10086', editor: '张顾问', title: '周末看房实景资料', createdAt: '2026-11-15 10:20', updatedAt: '2026-11-17 10:18', floors: [{title:'实景照片',count:2},{title:'实拍视频',count:1}], qr: 'qr-report-nanjing.png' },
+  { id: 'R002', city: '西安', roleId: 'B30021', editor: '王顾问', title: '西安三房看房参考', createdAt: '2026-11-16 16:00', updatedAt: '2026-11-17 10:38', floors: [{title:'房源推荐',count:2},{title:'实景照片',count:1}], qr: 'qr-report-xian.png' }
+];
+const search = { library: {}, reports: {} };
+let currentPage;
+let currentAsset;
+
+function canUse(page) {
+  return page === 'config' ? access.editShared : page === 'reports'
+    ? access.reportCities.includes(citySelect.value) : access.cities.includes(citySelect.value);
+}
+function canManageAvailability(asset) {
+  return canUse('library') && asset.city === citySelect.value
+    && access.manageCities.includes(asset.city) && !ReportPrototype.isDeleted(assetRef(asset));
+}
+function assetRef(asset) { return asset.ref || 'admin-asset-' + asset.id; }
+function usageStatus(asset) { return ReportPrototype.isDeleted(assetRef(asset)) ? '已删除' : ReportPrototype.isDisabled(assetRef(asset)) ? '已禁用' : '可用'; }
+function toggleAvailability(asset) {
+  if (currentPage !== 'library' || !canManageAvailability(asset)) return;
+  const disable = !ReportPrototype.isDisabled(assetRef(asset));
+  const message = disable
+    ? '禁用后，经纪人无法选择此素材，客户报告也会隐藏此素材。确定禁用？'
+    : '恢复后，经纪人可再次选择此素材，引用它的报告将重新展示。确定恢复？';
+  if (!confirm(message)) return;
+  if (!ReportPrototype.setDisabled(assetRef(asset), disable)) {
+    alert('操作未完成，请重试');
+    return;
+  }
+  renderList('library');
+}
+function assetName(asset) {
+  const [date, time] = asset.time.split(' ');
+  const [month, day] = date.split('-');
+  return asset.type + ' · ' + Number(month) + '月' + Number(day) + '日 ' + time;
+}
+function originalFileInfo(asset) {
+  return ReportPrototype.getMetadata(assetRef(asset)) || {
+    fileName: (asset.type === '视频' ? 'VID_' : 'IMG_') + String(asset.id).padStart(4, '0') + (asset.type === '视频' ? '.MOV' : '.JPG'),
+    format: asset.type === '视频' ? 'MOV' : 'JPEG',
+    size: asset.type === '视频' ? '28.4 MB' : '3.8 MB',
+    resolution: asset.type === '视频' ? '1920 × 1080' : '3024 × 4032',
+    duration: asset.type === '视频' ? '00:18' : undefined,
+    capturedAt: '未记录', device: '未记录', location: '未记录'
+  };
+}
+function make(tag, className, text) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text) el.textContent = text;
+  return el;
+}
+
+function renderList(page) {
+  if(page==='reports'){renderReports();return}
+  const rows=byId('libraryRows');rows.replaceChildren();
+  if(!canUse('library'))return;
+  const criteria=search.library;
+  const records=assets.filter(asset=>asset.city===citySelect.value
+    &&(!criteria.roleId||asset.roleId===criteria.roleId.toUpperCase())
+    &&(!criteria.name||asset.name.includes(criteria.name))
+    &&(!criteria.type||criteria.type==='全部'||asset.type===criteria.type)
+    &&(!criteria.source||criteria.source==='全部'||asset.source===criteria.source));
+  if(!records.length){const empty=make('td','table-empty','暂无符合条件的素材');empty.colSpan=10;rows.insertRow().append(empty);return}
+  for(const asset of records){
+    const row=rows.insertRow();const img=make('img','lib-thumb');img.src='../app/'+asset.image;img.alt='素材预览';row.insertCell().append(img);
+    for(const value of [assetName(asset),asset.roleId,asset.name,asset.type,asset.source,asset.time])row.insertCell().textContent=value;
+    const status=usageStatus(asset);row.insertCell().append(make('span','pill'+(status==='可用'?'':' no'),status));
+    row.insertCell().textContent=ReportPrototype.isDeleted(assetRef(asset))?'经纪人已删除':'';
+    const actions=row.insertCell();const view=make('button','link','查看');view.addEventListener('click',()=>openDetail(asset.id));actions.append(view);
+    if(canManageAvailability(asset)){const toggle=make('button','link',status==='已禁用'?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.addEventListener('click',()=>toggleAvailability(asset));actions.append(toggle)}
+  }
+}
+function renderReports() {
+  const rows = byId('reportsRows');
+  rows.replaceChildren();
+  if (!canUse('reports')) return;
+  const criteria = search.reports;
+  const visible = reports.filter(report => report.city === citySelect.value
+    && (!criteria.title || report.title.includes(criteria.title))
+    && (!criteria.roleId || report.roleId === criteria.roleId.toUpperCase())
+    && (!criteria.editor || report.editor.includes(criteria.editor)))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  if (!visible.length) {
+    const empty = make('td', 'table-empty', '暂无符合条件的报告');
+    empty.colSpan = 6;
+    rows.insertRow().append(empty);
+    return;
+  }
+  for (const report of visible) {
+    const row = rows.insertRow();
+    row.insertCell().append(make('span', 'report-name', report.title));
+    for (const value of [report.roleId, report.editor]) row.insertCell().textContent = value;
+    row.insertCell().append(make('span', 'report-modules', report.floors.map(floor => floor.title).join('、')));
+    row.insertCell().textContent = report.updatedAt;
+    const view = make('button', 'link', '查看报告');
+    view.addEventListener('click', () => openReportDetail(report.id));
+    row.insertCell().append(view);
+  }
+}
+
+function openReportDetail(id) {
+  if (currentPage !== 'reports' || !canUse('reports')) return;
+  const report = reports.find(item => item.id === id && item.city === citySelect.value);
+  if (!report) return;
+  byId('reports').hidden = true;
+  byId('reportDetail').hidden = false;
+  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / 报告查询 / 报告详情';
+  byId('reportDetailTitle').textContent = report.title;
+  const fields = [['角色 ID',report.roleId],['编辑人',report.editor],['所属城市',report.city],['创建时间',report.createdAt],['最近编辑时间',report.updatedAt]];
+  byId('reportDetailFields').replaceChildren(...fields.map(([label,value]) => {
+    const row = make('div','kv');
+    row.append(make('span','',label),make('b','',value));
+    return row;
+  }));
+  byId('reportDetailFloors').replaceChildren(...report.floors.map(floor => {
+    const row = make('div','report-floor');
+    row.append(make('span','',floor.title),make('small','',floor.count+' 条内容'));
+    return row;
+  }));
+  byId('reportQr').src = report.qr;
+  byId('reportQr').alt = report.title + '预览二维码';
+}
+
+function showPage(page) {
+  currentPage = page;
+  currentAsset = null;
+  byId('detail').hidden = true;
+  byId('reportDetail').hidden = true;
+  byId('unavailable').hidden = canUse(page);
+  for (const link of document.querySelectorAll('[data-page]')) {
+    const value = link.dataset.page;
+    link.hidden = !canUse(value);
+    link.classList.toggle('active', value === page);
+    byId(value).hidden = value !== page || !canUse(value);
+  }
+  byId('breadcrumb').textContent = '营销平台系统 / 资料库管理 / ' + pageNames[page];
+  if (!canUse(page)) return;
+  if (page === 'config') switchConfig(configKind);
+  else renderList(page);
+}
+
+function openDetail(id) {
+  if(currentPage!=='library'||!canUse('library'))return;
+  const asset=assets.find(item=>item.id===id&&item.city===citySelect.value);if(!asset)return;
+  currentAsset=asset;byId('library').hidden=true;byId('detail').hidden=false;byId('detailTitle').textContent='素材详情';
+  const preview=make(asset.type==='视频'?'video':'img');const imageUrl='../app/'+asset.image;
+  if(asset.type==='视频'){preview.poster=imageUrl;preview.src='https://jzt-ai.github.io/365-taofang-exclusive-report/report/sample.mp4';preview.controls=true}else{preview.src=imageUrl;preview.alt='素材预览'}
+  byId('detailPreview').replaceChildren(preview);
+  const fields=[['素材名称',assetName(asset)],['角色 ID',asset.roleId],['姓名',asset.name],['素材类型',asset.type],['上传场景',asset.source],['上传时间',asset.time],['使用状态',usageStatus(asset)]];
+  if(ReportPrototype.isDeleted(assetRef(asset)))fields.push(['备注','经纪人已删除'],['删除时间',new Date(ReportPrototype.deletedAt(assetRef(asset))).toLocaleString('zh-CN')]);
+  const metadata=originalFileInfo(asset);
+  const sourceFields=[['原始文件名',metadata.fileName],['文件格式',metadata.format],['文件大小',metadata.size],['分辨率',metadata.resolution],...(asset.type==='视频'?[['视频时长',metadata.duration]]:[]),['拍摄时间',metadata.capturedAt],['拍摄设备',metadata.device],['拍摄位置',metadata.location],...(metadata.camera?[['拍摄参数',metadata.camera]]:[])];
+  const row=([label,value])=>{const item=make('div','kv');item.append(make('span','',label),make('b','',value||'未记录'));return item};
+  byId('detailFields').replaceChildren(...fields.map(row),make('h3','detail-fields-title','原文件信息'),...sourceFields.map(row));
+}
+const configDefaults = {
+  help: '<p>常用的房源照片、讲解视频，可以先放进「我的素材」。上传后，组报告时随时能用。</p><p>在「我的报告」整理好客户关心的内容，和客户聊天时，从「发送资料」挑素材或报告发给他。</p>',
+  notice: '<p>请确认上传内容真实、合法且具有使用权。请勿上传侵权或违法内容。</p>'
+};
+let configKind = 'help';
+const configDrafts = {};
+
+function safeRich(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const allowed = new Set(['P', 'DIV', 'BR', 'B', 'STRONG', 'I', 'EM', 'UL', 'OL', 'LI', 'A']);
+  const walk = node => {
+    for (const child of [...node.children]) {
+      if (['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'SVG'].includes(child.tagName)) {
+        child.remove();
+        continue;
+      }
+      walk(child);
+      if (!allowed.has(child.tagName)) {
+        child.replaceWith(...child.childNodes);
+        continue;
+      }
+      const href = child.tagName === 'A' ? child.getAttribute('href') : null;
+      for (const attr of [...child.attributes]) child.removeAttribute(attr.name);
+      if (href && /^https?:\/\//i.test(href)) {
+        child.setAttribute('href', href);
+        child.setAttribute('target', '_blank');
+        child.setAttribute('rel', 'noopener noreferrer');
+      }
+    }
+  };
+  walk(template.content);
+  return template.innerHTML;
+}
+
+function configKey(kind) { return 'smallb-config-' + kind; }
+
+function switchConfig(kind) {
+  if (!canUse('config')) return;
+  configKind = kind;
+  for (const tab of document.querySelectorAll('[data-config-kind]')) {
+    tab.classList.toggle('on', tab.dataset.configKind === kind);
+  }
+  const isHelp = kind === 'help';
+  byId('configTitle').textContent = isHelp ? '功能说明' : '365有客App素材免责须知';
+  byId('configTip').textContent = isHelp
+    ? '经纪人在有客 App 的资料库查看。'
+    : '经纪人在组装报告页查看。';
+  let saved = configDefaults[kind];
+  try { saved = localStorage.getItem(configKey(kind)) || saved; } catch {}
+  byId('configEditor').innerHTML = safeRich(configDrafts[kind] ?? saved);
+  byId('configPreview').hidden = true;
+}
+
+function previewConfig() {
+  if (currentPage !== 'config' || !canUse('config')) return;
+  byId('configPreview').innerHTML = safeRich(byId('configEditor').innerHTML);
+  byId('configPreview').hidden = false;
+}
+
+for (const city of access.cities) citySelect.add(new Option(city, city));
+citySelect.hidden = !access.cities.length;
+citySelect.addEventListener('change', () => {
+  for (const page of ['library', 'reports']) {
+    byId(page + 'Filters').reset();
+    search[page] = {};
+  }
+  if (currentPage !== 'config') showPage(currentPage);
+});
+
+for (const page of ['library', 'reports']) {
+  const form = byId(page + 'Filters');
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    search[page] = Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, value.trim()]));
+    renderList(page);
+  });
+  form.addEventListener('reset', () => {
+    search[page] = {};
+    renderList(page);
+  });
+}
+byId('backToList').addEventListener('click', () => showPage(currentPage));
+byId('backToReports').addEventListener('click', () => showPage('reports'));
+for (const button of document.querySelectorAll('[data-config-kind]')) {
+  button.addEventListener('click', () => switchConfig(button.dataset.configKind));
+}
+for (const button of document.querySelectorAll('[data-format]')) {
+  button.addEventListener('mousedown', event => event.preventDefault());
+  button.addEventListener('click', () => {
+    if (currentPage !== 'config' || !canUse('config')) return;
+    const command = button.dataset.format;
+    byId('configEditor').focus();
+    const value = command === 'createLink' ? prompt('输入链接地址') : null;
+    if (command === 'createLink' && !/^https?:\/\//i.test(value || '')) return;
+    document.execCommand(command, false, value);
+  });
+}
+byId('configEditor').addEventListener('input', event => {
+  if (currentPage === 'config' && canUse('config')) configDrafts[configKind] = event.target.innerHTML;
+});
+byId('previewConfig').addEventListener('click', previewConfig);
+byId('saveConfig').addEventListener('click', () => {
+  if (currentPage !== 'config' || !canUse('config')) return;
+  const html = safeRich(byId('configEditor').innerHTML);
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  if (!template.content.textContent.trim()) {
+    alert('请填写内容');
+    return;
+  }
+  try {
+    localStorage.setItem(configKey(configKind), html);
+    delete configDrafts[configKind];
+    byId('configEditor').innerHTML = html;
+    previewConfig();
+    alert('已保存，对所有城市生效');
+  } catch {
+    alert('保存失败，请重试');
+  }
+});
+
+function route() {
+  const requested = location.hash.slice(1);
+  showPage(Object.hasOwn(pageNames, requested) ? requested : access.cities.length ? 'library' : 'config');
+}
+window.addEventListener('hashchange', route);
+ReportPrototype.onAvailabilityChange(() => {
+  if (currentPage !== 'library') return;
+  if (currentAsset) openDetail(currentAsset.id);
+  else renderList(currentPage);
+});
+route();
+</script>
+</body></html>
