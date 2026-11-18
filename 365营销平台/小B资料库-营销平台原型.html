@@ -21,29 +21,14 @@
 </header>
 <div class="shell">
   <aside class="side" aria-label="资料库管理">
-    <a href="#audit" data-page="audit">待审核素材</a>
-    <a href="#library" data-page="library">入库素材</a>
+    <a href="#library" data-page="library">素材管理</a>
     <a href="#reports" data-page="reports">报告查询</a>
     <a href="#config" data-page="config">说明与须知</a>
   </aside>
   <main class="main">
     <div class="crumb" id="breadcrumb"></div>
-    <section id="audit" hidden>
-      <div class="head"><h1>待审核素材</h1></div>
-      <form class="panel filters" id="auditFilters">
-        <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
-        <label>姓名<input name="name" placeholder="输入姓名"></label>
-        <label>素材类型<select name="type"><option>全部</option><option>图片</option><option>视频</option></select></label>
-        <label>上传场景<select name="source"><option>全部</option><option>素材库上传</option><option>会话发送</option></select></label>
-        <label>审核状态<select name="status"><option>全部</option><option>待人工审核</option><option>审核通过</option><option>审核未通过</option></select></label>
-        <button class="primary">查询</button><button class="ghost" type="reset">重置</button>
-      </form>
-      <div class="panel tablewrap">
-        <table><thead><tr><th>素材预览</th><th>素材名称</th><th>角色 ID</th><th>姓名</th><th>素材类型</th><th>上传场景</th><th>机审结果</th><th>审核状态</th><th>审核人</th><th>审核时间</th><th>上传时间</th><th>备注</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table>
-      </div>
-    </section>
     <section id="library" hidden>
-      <div class="head"><h1>入库素材</h1></div>
+      <div class="head"><h1>素材管理</h1></div>
       <form class="panel filters" id="libraryFilters">
         <label>角色 ID<input name="roleId" placeholder="输入角色 ID"></label>
         <label>素材分类<select name="type"><option>全部</option><option>图片</option><option>视频</option></select></label>
@@ -91,12 +76,6 @@
         <div class="panel"><div class="preview" id="detailPreview"></div></div>
         <div class="panel">
           <div id="detailFields"></div>
-          <div id="reviewActions" hidden>
-            <label>不通过原因<input class="field-input" id="reason" placeholder="填写不通过原因"></label>
-            <div class="actions">
-              <button class="primary" type="button" data-result="审核通过">人工通过</button>
-              <button class="ghost" type="button" data-result="审核未通过">人工不通过</button>
-            </div>
           </div>
         </div>
       </div>
@@ -117,30 +96,30 @@ const byId = id => document.getElementById(id);
 const citySelect = byId('citySelect');
 // Standalone prototype permission scenarios: ?profile=city, ?profile=view, ?profile=platform.
 const profiles = {
-  all: { cities: ['南京', '西安'], reviewCities: ['南京', '西安'], manageCities: ['南京', '西安'], reportCities: ['南京', '西安'], editShared: true },
-  city: { cities: ['西安'], reviewCities: ['西安'], manageCities: ['西安'], reportCities: ['西安'], editShared: false },
-  view: { cities: ['西安'], reviewCities: [], manageCities: [], reportCities: [], editShared: false },
-  platform: { cities: [], reviewCities: [], manageCities: [], reportCities: [], editShared: true }
+  all: { cities: ['南京', '西安'], manageCities: ['南京', '西安'], reportCities: ['南京', '西安'], editShared: true },
+  city: { cities: ['西安'], manageCities: ['西安'], reportCities: ['西安'], editShared: false },
+  view: { cities: ['西安'], manageCities: [], reportCities: [], editShared: false },
+  platform: { cities: [], manageCities: [], reportCities: [], editShared: true }
 };
 const profileKey = new URLSearchParams(location.search).get('profile');
 const access = Object.hasOwn(profiles, profileKey) ? profiles[profileKey] : profiles.all;
-const pageNames = { audit: '待审核素材', library: '入库素材', reports: '报告查询', config: '说明与须知' };
+const pageNames = { library: '素材管理', reports: '报告查询', config: '说明与须知' };
 const assets = [
-  { id: 1, ref: 'asset-3', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '素材库上传', time: '11-17 08:02', image: 'thumb-community.jpg', machine: '需人工审核', status: '待人工审核' },
-  { id: 2, city: '南京', roleId: 'B20415', name: '李顾问', type: '视频', source: '素材库上传', time: '11-17 09:31', image: 'thumb-video.jpg', machine: '不通过', status: '待人工审核' },
-  { id: 3, ref: 'asset-1', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '素材库上传', time: '11-17 09:42', image: 'thumb-living.jpg', machine: '通过', status: '审核通过' },
-  { id: 4, ref: 'asset-2', city: '南京', roleId: 'B10086', name: '张顾问', type: '视频', source: '会话发送', time: '11-17 09:31', image: 'thumb-video.jpg', machine: '通过', status: '审核通过' },
-  { id: 5, ref: 'asset-5', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '素材库上传', time: '11-16 16:06', image: 'thumb-community.jpg', machine: '通过', status: '审核通过' },
-  { id: 6, city: '西安', roleId: 'B30021', name: '王顾问', type: '图片', source: '素材库上传', time: '11-17 10:18', image: 'thumb-skyline.jpg', machine: '不通过', status: '待人工审核' },
-  { id: 7, city: '西安', roleId: 'B30021', name: '王顾问', type: '图片', source: '素材库上传', time: '11-17 09:23', image: 'thumb-community.jpg', machine: '通过', status: '审核通过' },
-  { id: 8, ref: 'asset-6', city: '南京', roleId: 'B10086', name: '张顾问', type: '视频', source: '素材库上传', time: '11-15 14:25', image: 'thumb-skyline.jpg', machine: '通过', status: '审核通过' },
-  { id: 9, ref: 'asset-4', city: '南京', roleId: 'B10086', name: '张顾问', type: '图片', source: '会话发送', time: '11-16 17:20', image: 'thumb-skyline.jpg', machine: '不通过', status: '审核未通过', manual: '审核未通过', reviewer: '运营审核员', reviewedAt: '11-16 17:31', reason: '内容不符合平台发布规范' }
+  {id:1,ref:'asset-3',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-17 08:02',image:'thumb-community.jpg'},
+  {id:2,city:'南京',roleId:'B20415',name:'李顾问',type:'视频',source:'素材库上传',time:'11-17 09:31',image:'thumb-video.jpg'},
+  {id:3,ref:'asset-1',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-17 09:42',image:'thumb-living.jpg'},
+  {id:4,ref:'asset-2',city:'南京',roleId:'B10086',name:'张顾问',type:'视频',source:'会话发送',time:'11-17 09:31',image:'thumb-video.jpg'},
+  {id:5,ref:'asset-5',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'素材库上传',time:'11-16 16:06',image:'thumb-community.jpg'},
+  {id:6,city:'西安',roleId:'B30021',name:'王顾问',type:'图片',source:'素材库上传',time:'11-17 10:18',image:'thumb-skyline.jpg'},
+  {id:7,city:'西安',roleId:'B30021',name:'王顾问',type:'图片',source:'素材库上传',time:'11-17 09:23',image:'thumb-community.jpg'},
+  {id:8,ref:'asset-6',city:'南京',roleId:'B10086',name:'张顾问',type:'视频',source:'素材库上传',time:'11-15 14:25',image:'thumb-skyline.jpg'},
+  {id:9,ref:'asset-4',city:'南京',roleId:'B10086',name:'张顾问',type:'图片',source:'会话发送',time:'11-16 17:20',image:'thumb-skyline.jpg'}
 ];
 const reports = [
   { id: 'R001', city: '南京', roleId: 'B10086', editor: '张顾问', title: '周末看房实景资料', createdAt: '2026-11-15 10:20', updatedAt: '2026-11-17 10:18', floors: [{title:'实景照片',count:2},{title:'实拍视频',count:1}], qr: 'qr-report-nanjing.png' },
-  { id: 'R002', city: '西安', roleId: 'B30021', editor: '王顾问', title: '西安三房看房参考', createdAt: '2026-11-16 16:00', updatedAt: '2026-11-17 10:38', floors: [{title:'房源推荐',count:2},{title:'小区推荐',count:1},{title:'实景照片',count:1}], qr: 'qr-report-xian.png' }
+  { id: 'R002', city: '西安', roleId: 'B30021', editor: '王顾问', title: '西安三房看房参考', createdAt: '2026-11-16 16:00', updatedAt: '2026-11-17 10:38', floors: [{title:'房源推荐',count:2},{title:'实景照片',count:1}], qr: 'qr-report-xian.png' }
 ];
-const search = { audit: {}, library: {}, reports: {} };
+const search = { library: {}, reports: {} };
 let currentPage;
 let currentAsset;
 
@@ -148,13 +127,9 @@ function canUse(page) {
   return page === 'config' ? access.editShared : page === 'reports'
     ? access.reportCities.includes(citySelect.value) : access.cities.includes(citySelect.value);
 }
-function canReview(asset) {
-  return asset.city === citySelect.value && access.reviewCities.includes(asset.city)
-    && asset.status === '待人工审核' && !ReportPrototype.isDeleted(assetRef(asset));
-}
 function canManageAvailability(asset) {
   return canUse('library') && asset.city === citySelect.value
-    && access.manageCities.includes(asset.city) && asset.status === '审核通过' && !ReportPrototype.isDeleted(assetRef(asset));
+    && access.manageCities.includes(asset.city) && !ReportPrototype.isDeleted(assetRef(asset));
 }
 function assetRef(asset) { return asset.ref || 'admin-asset-' + asset.id; }
 function usageStatus(asset) { return ReportPrototype.isDeleted(assetRef(asset)) ? '已删除' : ReportPrototype.isDisabled(assetRef(asset)) ? '已禁用' : '可用'; }
@@ -194,63 +169,25 @@ function make(tag, className, text) {
 }
 
 function renderList(page) {
-  if (page === 'reports') { renderReports(); return; }
-  const rows = byId(page + 'Rows');
-  rows.replaceChildren();
-  if (!canUse(page)) return;
-
-  const criteria = search[page];
-  const records = assets.filter(asset =>
-    asset.city === citySelect.value &&
-    (page !== 'library' || asset.status === '审核通过') &&
-    (!criteria.roleId || asset.roleId === criteria.roleId.toUpperCase()) &&
-    (!criteria.name || asset.name.includes(criteria.name)) &&
-    ['type', 'source', 'status'].every(field =>
-      !criteria[field] || criteria[field] === '全部' || asset[field] === criteria[field])
-  );
-  if (page === 'audit') {
-    records.sort((a, b) => Number(b.status === '待人工审核') - Number(a.status === '待人工审核'));
-  }
-  if (!records.length) {
-    const empty = make('td', 'table-empty', '暂无符合条件的素材');
-    empty.colSpan = page === 'audit' ? 13 : 10;
-    rows.insertRow().append(empty);
-    return;
-  }
-
-  for (const asset of records) {
-    const row = rows.insertRow();
-    const img = make('img', 'lib-thumb');
-    img.src = '../有客App/' + asset.image;
-    img.alt = '素材预览';
-    row.insertCell().append(img);
-    for (const value of [assetName(asset), asset.roleId, asset.name, asset.type, asset.source]) {
-      row.insertCell().textContent = value;
-    }
-    if (page === 'audit') row.insertCell().textContent = asset.machine;
-    if (page === 'library') row.insertCell().textContent = asset.time;
-    const status = page === 'library' ? usageStatus(asset) : asset.status;
-    const tone = ['可用', '审核通过'].includes(status) ? '' : ['已禁用', '已删除', '审核未通过'].includes(status) ? ' no' : ' wait';
-    row.insertCell().append(make('span', 'pill' + tone, status));
-    if (page === 'audit') {
-      row.insertCell().textContent = asset.manual ? (asset.reviewer || '未记录') : '—';
-      row.insertCell().textContent = asset.manual ? (asset.reviewedAt || '未记录') : '—';
-    }
-    if (page === 'audit') row.insertCell().textContent = asset.time;
-    row.insertCell().textContent = ReportPrototype.isDeleted(assetRef(asset)) ? '经纪人已删除' : '';
-    const view = make('button', 'link', page === 'audit' && canReview(asset) ? '审核' : '查看');
-    view.addEventListener('click', () => openDetail(asset.id));
-    const actions = row.insertCell();
-    actions.append(view);
-    if (page === 'library' && canManageAvailability(asset)) {
-      const toggle = make('button', 'link', status === '已禁用' ? '恢复' : '禁用');
-      toggle.style.marginLeft = '12px';
-      toggle.addEventListener('click', () => toggleAvailability(asset));
-      actions.append(toggle);
-    }
+  if(page==='reports'){renderReports();return}
+  const rows=byId('libraryRows');rows.replaceChildren();
+  if(!canUse('library'))return;
+  const criteria=search.library;
+  const records=assets.filter(asset=>asset.city===citySelect.value
+    &&(!criteria.roleId||asset.roleId===criteria.roleId.toUpperCase())
+    &&(!criteria.name||asset.name.includes(criteria.name))
+    &&(!criteria.type||criteria.type==='全部'||asset.type===criteria.type)
+    &&(!criteria.source||criteria.source==='全部'||asset.source===criteria.source));
+  if(!records.length){const empty=make('td','table-empty','暂无符合条件的素材');empty.colSpan=10;rows.insertRow().append(empty);return}
+  for(const asset of records){
+    const row=rows.insertRow();const img=make('img','lib-thumb');img.src='../有客App/'+asset.image;img.alt='素材预览';row.insertCell().append(img);
+    for(const value of [assetName(asset),asset.roleId,asset.name,asset.type,asset.source,asset.time])row.insertCell().textContent=value;
+    const status=usageStatus(asset);row.insertCell().append(make('span','pill'+(status==='可用'?'':' no'),status));
+    row.insertCell().textContent=ReportPrototype.isDeleted(assetRef(asset))?'经纪人已删除':'';
+    const actions=row.insertCell();const view=make('button','link','查看');view.addEventListener('click',()=>openDetail(asset.id));actions.append(view);
+    if(canManageAvailability(asset)){const toggle=make('button','link',status==='已禁用'?'恢复':'禁用');toggle.style.marginLeft='12px';toggle.addEventListener('click',()=>toggleAvailability(asset));actions.append(toggle)}
   }
 }
-
 function renderReports() {
   const rows = byId('reportsRows');
   rows.replaceChildren();
@@ -321,87 +258,22 @@ function showPage(page) {
 }
 
 function openDetail(id) {
-  if (!['audit', 'library'].includes(currentPage) || !canUse(currentPage)) return;
-  const asset = assets.find(item => item.id === id && item.city === citySelect.value);
-  if (!asset || (currentPage === 'library' && asset.status !== '审核通过')) return;
-  currentAsset = asset;
-  byId(currentPage).hidden = true;
-  byId('detail').hidden = false;
-  byId('detailTitle').textContent = currentPage === 'library' ? '入库素材详情' : '素材详情';
-  const preview = make(asset.type === '视频' ? 'video' : 'img');
-  const imageUrl = '../有客App/' + asset.image;
-  if (asset.type === '视频') {
-    preview.poster = imageUrl;
-    preview.src = '../微信淘房小程序/报告视频示例.mp4';
-    preview.controls = true;
-  } else {
-    preview.src = imageUrl;
-    preview.alt = '素材预览';
-  }
+  if(currentPage!=='library'||!canUse('library'))return;
+  const asset=assets.find(item=>item.id===id&&item.city===citySelect.value);if(!asset)return;
+  currentAsset=asset;byId('library').hidden=true;byId('detail').hidden=false;byId('detailTitle').textContent='素材详情';
+  const preview=make(asset.type==='视频'?'video':'img');const imageUrl='../有客App/'+asset.image;
+  if(asset.type==='视频'){preview.poster=imageUrl;preview.src='../微信淘房小程序/报告视频示例.mp4';preview.controls=true}else{preview.src=imageUrl;preview.alt='素材预览'}
   byId('detailPreview').replaceChildren(preview);
-  const fields = [
-    ['素材名称', assetName(asset)], ['角色 ID', asset.roleId], ['姓名', asset.name],
-    ['素材类型', asset.type], ['上传场景', asset.source], ['上传时间', asset.time]
-  ];
-  if (currentPage === 'library') {
-    fields.push(['使用状态', usageStatus(asset)]);
-  } else {
-    fields.push(['机审结果', asset.machine], ['审核状态', asset.status]);
-    if (asset.manual) fields.push(['人工审核结果', asset.manual]);
-    if (asset.manual) fields.push(['审核人', asset.reviewer || '未记录'], ['审核时间', asset.reviewedAt || '未记录']);
-    if (asset.reason) fields.push(['不通过原因', asset.reason]);
-  }
-  if (ReportPrototype.isDeleted(assetRef(asset))) {
-    fields.push(['备注', '经纪人已删除']);
-    fields.push(['删除时间', new Date(ReportPrototype.deletedAt(assetRef(asset))).toLocaleString('zh-CN')]);
-  }
-  const metadata = originalFileInfo(asset);
-  const sourceFields = [
-    ['原始文件名', metadata.fileName], ['文件格式', metadata.format],
-    ['文件大小', metadata.size], ['分辨率', metadata.resolution],
-    ...(asset.type === '视频' ? [['视频时长', metadata.duration]] : []),
-    ['拍摄时间', metadata.capturedAt], ['拍摄设备', metadata.device],
-    ['拍摄位置', metadata.location], ...(metadata.camera ? [['拍摄参数', metadata.camera]] : [])
-  ];
-  const rows = fields.map(([label, value]) => {
-    const row = make('div', 'kv');
-    row.append(make('span', '', label), make('b', '', value || '未记录'));
-    return row;
-  });
-  rows.push(make('h3', 'detail-fields-title', '原文件信息'));
-  rows.push(...sourceFields.map(([label, value]) => {
-    const row = make('div', 'kv');
-    row.append(make('span', '', label), make('b', '', value || '未记录'));
-    return row;
-  }));
-  byId('detailFields').replaceChildren(...rows);
-  byId('reason').value = '';
-  byId('reason').setCustomValidity('');
-  byId('reviewActions').hidden = currentPage !== 'audit' || !canReview(asset);
+  const fields=[['素材名称',assetName(asset)],['角色 ID',asset.roleId],['姓名',asset.name],['素材类型',asset.type],['上传场景',asset.source],['上传时间',asset.time],['使用状态',usageStatus(asset)]];
+  if(ReportPrototype.isDeleted(assetRef(asset)))fields.push(['备注','经纪人已删除'],['删除时间',new Date(ReportPrototype.deletedAt(assetRef(asset))).toLocaleString('zh-CN')]);
+  const metadata=originalFileInfo(asset);
+  const sourceFields=[['原始文件名',metadata.fileName],['文件格式',metadata.format],['文件大小',metadata.size],['分辨率',metadata.resolution],...(asset.type==='视频'?[['视频时长',metadata.duration]]:[]),['拍摄时间',metadata.capturedAt],['拍摄设备',metadata.device],['拍摄位置',metadata.location],...(metadata.camera?[['拍摄参数',metadata.camera]]:[])];
+  const row=([label,value])=>{const item=make('div','kv');item.append(make('span','',label),make('b','',value||'未记录'));return item};
+  byId('detailFields').replaceChildren(...fields.map(row),make('h3','detail-fields-title','原文件信息'),...sourceFields.map(row));
 }
-
-function decide(result) {
-  const asset = currentAsset;
-  if (currentPage !== 'audit' || !asset || !canReview(asset)) return;
-  const reasonInput = byId('reason');
-  const reason = reasonInput.value.trim();
-  if (result === '审核未通过' && !reason) {
-    reasonInput.setCustomValidity('请填写不通过原因');
-    reasonInput.reportValidity();
-    return;
-  }
-  if (!confirm(result === '审核通过' ? '确认人工审核通过？' : '确认人工审核不通过？')) return;
-  asset.status = result;
-  asset.manual = result;
-  asset.reviewer = document.querySelector('.user span')?.textContent.trim() || '运营审核员';
-  asset.reviewedAt = new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
-  asset.reason = result === '审核未通过' ? reason : '';
-  openDetail(asset.id);
-}
-
 const configDefaults = {
-  help: '<p>常用的房源照片、讲解视频，可以先放进「我的素材」。审核通过后，组报告时随时能用。</p><p>在「我的报告」整理好客户关心的内容，和客户聊天时，从「发送资料」挑素材或报告发给他。</p>',
-  notice: '<p>请确认上传内容真实、合法且具有使用权。平台会进行内容审核。审核通过不代表对素材真实性作出保证。</p>'
+  help: '<p>常用的房源照片、讲解视频，可以先放进「我的素材」。上传后，组报告时随时能用。</p><p>在「我的报告」整理好客户关心的内容，和客户聊天时，从「发送资料」挑素材或报告发给他。</p>',
+  notice: '<p>请确认上传内容真实、合法且具有使用权。请勿上传侵权或违法内容。</p>'
 };
 let configKind = 'help';
 const configDrafts = {};
@@ -462,14 +334,14 @@ function previewConfig() {
 for (const city of access.cities) citySelect.add(new Option(city, city));
 citySelect.hidden = !access.cities.length;
 citySelect.addEventListener('change', () => {
-  for (const page of ['audit', 'library', 'reports']) {
+  for (const page of ['library', 'reports']) {
     byId(page + 'Filters').reset();
     search[page] = {};
   }
   if (currentPage !== 'config') showPage(currentPage);
 });
 
-for (const page of ['audit', 'library', 'reports']) {
+for (const page of ['library', 'reports']) {
   const form = byId(page + 'Filters');
   form.addEventListener('submit', event => {
     event.preventDefault();
@@ -483,10 +355,6 @@ for (const page of ['audit', 'library', 'reports']) {
 }
 byId('backToList').addEventListener('click', () => showPage(currentPage));
 byId('backToReports').addEventListener('click', () => showPage('reports'));
-byId('reason').addEventListener('input', event => event.target.setCustomValidity(''));
-for (const button of document.querySelectorAll('[data-result]')) {
-  button.addEventListener('click', () => decide(button.dataset.result));
-}
 for (const button of document.querySelectorAll('[data-config-kind]')) {
   button.addEventListener('click', () => switchConfig(button.dataset.configKind));
 }
@@ -527,11 +395,11 @@ byId('saveConfig').addEventListener('click', () => {
 
 function route() {
   const requested = location.hash.slice(1);
-  showPage(Object.hasOwn(pageNames, requested) ? requested : access.cities.length ? 'audit' : 'config');
+  showPage(Object.hasOwn(pageNames, requested) ? requested : access.cities.length ? 'library' : 'config');
 }
 window.addEventListener('hashchange', route);
 ReportPrototype.onAvailabilityChange(() => {
-  if (!['library', 'audit'].includes(currentPage)) return;
+  if (currentPage !== 'library') return;
   if (currentAsset) openDetail(currentAsset.id);
   else renderList(currentPage);
 });
