@@ -243,7 +243,7 @@ function renderSentReports(){
     const ownDisabled=snapshotDisabled.has(record.id),parentDisabled=reportDisabled.has(record.reportId);
     row.insertCell().textContent=ownDisabled?(parentDisabled?'已禁用（报告也已禁用）':'已禁用'):parentDisabled?'可用（报告已禁用）':'可用';
     const op=row.insertCell();
-    const view=make('button','link','扫码查看');view.onclick=()=>openSnapshotDetail(record);op.append(view);
+    const view=make('button','link','查看');view.onclick=()=>openSnapshotDetail(record);op.append(view);
     const toggle=make('button','link',ownDisabled?'恢复':'禁用');toggle.style.marginLeft='12px';
     toggle.onclick=()=>{
       if(!confirm((snapshotDisabled.has(record.id)?'恢复':'禁用')+'这次发送快照？'))return;
@@ -255,7 +255,7 @@ function renderSentReports(){
   }
 }
 let currentSnapshot=null;
-function openSnapshotDetail(record){currentSnapshot=record;byId('sentReports').hidden=true;byId('snapshotDetail').hidden=false;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告管理 / '+record.title+' / 发送记录 / 扫码查看';byId('snapshotTitle').textContent='本次发送';const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);byId('snapshotFields').textContent='发送时间：'+record.time+'  ·  接收用户 788 ID：'+record.recipient788Id;byId('snapshotStatusTip').textContent=disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页';byId('snapshotQr').src=disabled?'qr-report-unavailable.png':reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png'}
+function openSnapshotDetail(record){currentSnapshot=record;byId('sentReports').hidden=true;byId('snapshotDetail').hidden=false;byId('breadcrumb').textContent='营销平台系统 / 资料库管理 / 报告管理 / '+record.title+' / 发送记录 / 查看';byId('snapshotTitle').textContent='本次发送';const disabled=reportDisabled.has(record.reportId)||snapshotDisabled.has(record.id);byId('snapshotFields').textContent='发送时间：'+record.time+'  ·  接收用户 788 ID：'+record.recipient788Id;byId('snapshotStatusTip').textContent=disabled?'扫码可查看客户所见的暂不可查看页面':'扫码查看本次发送的历史客户页';byId('snapshotQr').src=disabled?'qr-report-unavailable.png':reports.find(x=>x.id===record.reportId)?.qr||'qr-report-xian.png'}
 byId('backToSentReports').onclick=()=>openSentRecords();
 byId('backFromSentReports').onclick=()=>showPage('reports');
 byId('openSnapshot').onclick=()=>{if(!currentSnapshot)return;const sample=currentSnapshot.reportId;const disabled=reportDisabled.has(sample)||snapshotDisabled.has(currentSnapshot.id);window.open('https://jzt-ai.github.io/365-taofang-exclusive-report/report/?sample='+sample+(disabled?'&disabled=1':''),'_blank')};
